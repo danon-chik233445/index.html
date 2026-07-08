@@ -822,8 +822,8 @@
         window.addEventListener('touchmove', onDragMove, {passive: false});
         window.addEventListener('touchend', onDragEnd);
         document.addEventListener('gesturestart', e => e.preventDefault());
-        document.addEventListener('click', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) hideAllPlantMenus(); });
-        document.addEventListener('touchend', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) setTimeout(hideAllPlantMenus, 100); });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) { hideAllPlantMenus(); hideTooltip(); } });
+        document.addEventListener('touchend', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) { setTimeout(() => { hideAllPlantMenus(); hideTooltip(); }, 100); } });
 
         // УВЕДОМЛЕНИЯ
         function showNotification(t, d = 2000) { const n = document.getElementById('notification'); n.textContent = t; n.classList.add('show'); clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), d); }
@@ -1076,10 +1076,26 @@
         function setupPlantInteractions(plantData) {
             const wrapper = plantData.el; let lastTap = 0; let tapTimeout = null;
             wrapper.addEventListener('click', (e) => { e.stopPropagation(); if (e.target.closest('.delete-btn')) return; if (e.target.closest('.plant-menu')) return; if (isMobile) return; handlePlantInteraction(plantData, e); });
-            wrapper.addEventListener('touchend', (e) => { if (e.target.closest('.delete-btn')) return; if (e.target.closest('.plant-menu')) return; e.stopPropagation(); e.preventDefault(); if (!isMobile) return; const now = Date.now(); const timeSinceLastTap = now - lastTap; lastTap = now; if (timeSinceLastTap < 500 && timeSinceLastTap > 50) { clearTimeout(tapTimeout); tapTimeout = null; lastTap = 0; showTooltip(e, plantData); setTimeout(() => hideTooltip(), 3000); } else { clearTimeout(tapTimeout); tapTimeout = setTimeout(() => { showPlantMenu(e, plantData); tapTimeout = null; }, 500); } });
-            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData)); wrapper.addEventListener('mousemove', (e) => positionTooltip(e)); wrapper.addEventListener('mouseleave', () => hideTooltip());
+            wrapper.addEventListener('touchend', (e) => {
+                if (e.target.closest('.delete-btn')) return; if (e.target.closest('.plant-menu')) return;
+                e.stopPropagation(); e.preventDefault(); if (!isMobile) return;
+                const now = Date.now(); const timeSinceLastTap = now - lastTap; lastTap = now;
+                if (timeSinceLastTap < 500 && timeSinceLastTap > 50) {
+                    clearTimeout(tapTimeout); tapTimeout = null; lastTap = 0;
+                    showTooltip(e, plantData);
+                } else {
+                    clearTimeout(tapTimeout);
+                    tapTimeout = setTimeout(() => { showPlantMenu(e, plantData); tapTimeout = null; }, 500);
+                }
+            });
+            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
+            wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
+            wrapper.addEventListener('mouseleave', () => hideTooltip());
         }
-        function handlePlantInteraction(plantData, e) { if (clickTimers.has(plantData)) { clearTimeout(clickTimers.get(plantData)); clickTimers.delete(plantData); giftFirefly(plantData); } else { clickTimers.set(plantData, setTimeout(() => { clickTimers.delete(plantData); waterPlant(plantData, e); }, 300)); } }
+        function handlePlantInteraction(plantData, e) {
+            if (clickTimers.has(plantData)) { clearTimeout(clickTimers.get(plantData)); clickTimers.delete(plantData); giftFirefly(plantData); }
+            else { clickTimers.set(plantData, setTimeout(() => { clickTimers.delete(plantData); waterPlant(plantData, e); }, 300)); }
+        }
 
         function plantSeed() {
             if (!isAdmin) { const now = Date.now(); const elapsed = Math.floor((now - lastPlantTime) / 1000); if (elapsed < PLANT_COOLDOWN) { const remaining = PLANT_COOLDOWN - elapsed; const min = Math.floor(remaining / 60); const sec = remaining % 60; showNotification(`⏳ Подожди ${min}:${sec.toString().padStart(2, '0')}`, 2000); return; } }
