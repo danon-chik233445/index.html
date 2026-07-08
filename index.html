@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <title>Сад Запоздалых Слов</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,6 +13,9 @@
             overflow: hidden;
             height: 100vh;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
         }
         
         .sky {
@@ -151,6 +154,7 @@
             cursor: grab;
         }
         .viewport:active { cursor: grabbing; }
+        .viewport.grabbing { cursor: grabbing; }
         
         .meadow-layer {
             position: absolute;
@@ -172,6 +176,10 @@
         }
         .plant-wrapper:hover { z-index: 20; }
         .plant-wrapper:hover .plant-img {
+            transform: scale(1.15);
+            filter: brightness(1.4) drop-shadow(0 0 10px rgba(255,215,0,0.5));
+        }
+        .plant-wrapper:active .plant-img {
             transform: scale(1.15);
             filter: brightness(1.4) drop-shadow(0 0 10px rgba(255,215,0,0.5));
         }
@@ -309,6 +317,32 @@
             pointer-events: none;
         }
 
+        /* Индикатор онлайна */
+        .online-indicator {
+            position: fixed;
+            top: 50px;
+            right: 30px;
+            z-index: 10;
+            color: #5a8a5a;
+            font-size: 11px;
+            opacity: 0.7;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #4f8;
+            border-radius: 50%;
+            animation: onlinePulse 2s infinite;
+        }
+        @keyframes onlinePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         .top-panel {
             position: fixed;
             top: 70px; right: 20px;
@@ -354,7 +388,6 @@
             box-shadow: 0 0 15px rgba(255, 100, 100, 0.3);
         }
         
-        /* Окно входа */
         .admin-login-menu {
             animation: fadeIn 0.2s ease;
         }
@@ -367,18 +400,18 @@
             position: absolute;
             top: -15px;
             right: -10px;
-            width: 22px;
-            height: 22px;
+            width: 28px;
+            height: 28px;
             background: rgba(200, 40, 40, 0.8);
             color: #fff;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             z-index: 30;
             display: none;
             pointer-events: auto;
-            line-height: 22px;
+            line-height: 28px;
             text-align: center;
         }
         .delete-btn:hover {
@@ -494,6 +527,36 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.3); }
         }
+
+        @media (max-width: 768px) {
+            .viewport { height: 60%; }
+            .earth-layer { height: 40%; }
+            .input-panel { bottom: 20px; padding: 8px 14px; gap: 6px; }
+            .input-panel input { width: 180px; font-size: 14px; }
+            .input-panel button { padding: 8px 16px; font-size: 12px; min-width: 100px; }
+            .hint { top: 15px; font-size: 11px; }
+            .counter { top: 15px; right: 15px; font-size: 11px; }
+            .online-indicator { top: 35px; right: 15px; font-size: 10px; }
+            .top-panel { top: 50px; right: 10px; gap: 4px; }
+            .top-btn { padding: 6px 10px; font-size: 10px; border-radius: 15px; }
+            .tooltip { font-size: 12px; max-width: 220px; padding: 10px 12px; }
+            .legend { bottom: 80px; font-size: 9px; }
+            .notification { top: 45px; font-size: 12px; padding: 8px 16px; }
+            .moon { width: 50px; height: 50px; top: 10%; right: 10%; }
+            .plant-wrapper:hover .plant-img { transform: scale(1.08); }
+            .delete-btn { width: 32px; height: 32px; font-size: 18px; line-height: 32px; top: -18px; right: -12px; }
+        }
+
+        @media (max-width: 480px) {
+            .input-panel { bottom: 15px; padding: 6px 10px; gap: 4px; border-radius: 30px; }
+            .input-panel input { width: 130px; font-size: 12px; }
+            .input-panel button { padding: 6px 12px; font-size: 10px; min-width: 80px; }
+            .top-panel { top: 40px; right: 5px; }
+            .top-btn { padding: 4px 8px; font-size: 9px; }
+            .hint { top: 10px; font-size: 10px; }
+            .counter { top: 10px; font-size: 10px; }
+            .online-indicator { top: 25px; font-size: 9px; }
+        }
     </style>
 </head>
 <body>
@@ -514,15 +577,19 @@
     
     <div class="hint">🌿 САД ЗАПОЗДАЛЫХ СЛОВ 🌿</div>
     <div class="counter" id="counter">Растений в саду: 0</div>
+    <div class="online-indicator" id="onlineIndicator">
+        <div class="online-dot"></div>
+        <span id="onlineCount">0 онлайн</span>
+    </div>
     
     <div class="top-panel" id="topPanel">
-        <button class="top-btn" onclick="showTop3()">🏆 Топ-3 популярных</button>
-        <button class="top-btn" onclick="findGarden()">🔍 Найти сад</button>
+        <button class="top-btn" id="btnTop3">🏆 Топ-3</button>
+        <button class="top-btn" id="btnFindGarden">🔍 Поиск</button>
         <button class="top-btn admin-btn" id="adminToggleBtn">🔑 Админ</button>
     </div>
     
     <div class="legend" id="legend">
-        💧 клик — полить (макс. 3) &nbsp;|&nbsp; ✨ двойной клик — светлячок (макс. 1) &nbsp;|&nbsp; наведи — прочитать
+        💧 тап — полить (макс. 3) &nbsp;|&nbsp; ✨ двойной тап — светлячок (макс. 1) &nbsp;|&nbsp; наведи — прочитать
     </div>
     
     <div class="notification" id="notification"></div>
@@ -533,7 +600,23 @@
         <button onclick="plantSeed()">Посадить 🌱</button>
     </div>
 
-    <script>
+    <script type="module">
+        // Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, push, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTLj6o4j4q4q4q4q4q4q4q4q4q4q4q4q4",
+            authDomain: "sad-zapozdalyh-slov.firebaseapp.com",
+            databaseURL: "https://sad-zapozdalyh-slov-default-rtdb.firebaseio.com",
+            projectId: "sad-zapozdalyh-slov",
+            storageBucket: "sad-zapozdalyh-slov.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
         const MAX_WATER = 3;
         const MAX_FIREFLIES = 1;
         const MIN_PLANT_DISTANCE = 130;
@@ -546,6 +629,153 @@
         let lastPlantTime = 0;
         let cooldownTimer = null;
         let isAdmin = false;
+        let isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+        let onlineCount = 0;
+        let myUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+        let onlineRef = null;
+        let plantsRef = null;
+
+        // === Firebase: онлайн-статус ===
+        function setupOnlineStatus() {
+            onlineRef = ref(db, 'online/' + myUserId);
+            const userRef = onlineRef;
+            
+            // Записываем что мы онлайн
+            set(userRef, {
+                lastSeen: Date.now()
+            });
+            
+            // Удаляем при уходе
+            window.addEventListener('beforeunload', () => {
+                remove(userRef);
+            });
+            
+            // Слушаем онлайн
+            const onlineListRef = ref(db, 'online');
+            onValue(onlineListRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                onlineCount = Object.keys(data).length;
+                document.getElementById('onlineCount').textContent = onlineCount + ' онлайн';
+            });
+        }
+
+        // === Firebase: синхронизация растений ===
+        function setupPlantsSync() {
+            plantsRef = ref(db, 'plants');
+            
+            // Слушаем новые растения от других
+            onValue(plantsRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const serverPlants = Object.entries(data).map(([id, p]) => ({...p, firebaseId: id}));
+                
+                // Удаляем растения, которых нет на сервере
+                allPlants = allPlants.filter(localPlant => {
+                    const exists = serverPlants.find(sp => sp.firebaseId === localPlant.firebaseId);
+                    if (!exists && localPlant.firebaseId) {
+                        localPlant.giftedFireflies.forEach(f => f.remove());
+                        localPlant.el.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Добавляем/обновляем растения с сервера
+                serverPlants.forEach(serverPlant => {
+                    const existing = allPlants.find(p => p.firebaseId === serverPlant.firebaseId);
+                    if (!existing) {
+                        // Новое растение — создаём
+                        createPlantFromServer(serverPlant);
+                    } else {
+                        // Обновляем существующее
+                        updatePlantFromServer(existing, serverPlant);
+                    }
+                });
+                
+                plantCount = allPlants.length;
+                document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
+                
+                if (isAdmin) {
+                    showAllDeleteButtons();
+                }
+            });
+        }
+
+        function createPlantFromServer(data) {
+            const plant = plants.find(p => p.type === data.type) || plants[0];
+            const imgSrc = drawPlant(data.type, plant.color);
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'plant-wrapper';
+            wrapper.style.left = data.x + 'px';
+            wrapper.style.top = data.y + 'px';
+            wrapper.style.width = '70px';
+            wrapper.style.height = '120px';
+            
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.className = 'plant-img';
+            img.style.width = '70px';
+            img.style.height = '100px';
+            wrapper.appendChild(img);
+            
+            const plantData = {
+                x: data.x, y: data.y, el: wrapper, text: data.text,
+                name: plant.name, emoji: plant.emoji, type: data.type,
+                watered: data.watered || 0, fireflies: data.fireflies || 0,
+                giftedFireflies: [], plantedAt: data.plantedAt || Date.now(),
+                firebaseId: data.firebaseId
+            };
+            
+            setupPlantInteractions(plantData);
+            meadowLayer.appendChild(wrapper);
+            allPlants.push(plantData);
+            
+            if (isAdmin) addDeleteButton(plantData);
+        }
+
+        function updatePlantFromServer(localPlant, serverPlant) {
+            if (serverPlant.watered !== localPlant.watered || serverPlant.fireflies !== localPlant.fireflies) {
+                localPlant.watered = serverPlant.watered || 0;
+                localPlant.fireflies = serverPlant.fireflies || 0;
+                updatePlantIndicators(localPlant);
+            }
+        }
+
+        function savePlantToFirebase(plantData) {
+            const newPlantRef = push(plantsRef);
+            const firebaseId = newPlantRef.key;
+            plantData.firebaseId = firebaseId;
+            
+            set(newPlantRef, {
+                x: plantData.x,
+                y: plantData.y,
+                text: plantData.text,
+                type: plantData.type,
+                watered: plantData.watered,
+                fireflies: plantData.fireflies,
+                plantedAt: plantData.plantedAt
+            });
+        }
+
+        function updatePlantOnFirebase(plantData) {
+            if (!plantData.firebaseId) return;
+            const plantRef = ref(db, 'plants/' + plantData.firebaseId);
+            set(plantRef, {
+                x: plantData.x,
+                y: plantData.y,
+                text: plantData.text,
+                type: plantData.type,
+                watered: plantData.watered,
+                fireflies: plantData.fireflies,
+                plantedAt: plantData.plantedAt
+            });
+        }
+
+        function deletePlantFromFirebase(plantData) {
+            if (!plantData.firebaseId) return;
+            const plantRef = ref(db, 'plants/' + plantData.firebaseId);
+            remove(plantRef);
+        }
 
         // === НЕБО ===
         const sky = document.getElementById('sky');
@@ -688,28 +918,31 @@
         let activeTooltip = null;
         let clickTimers = new Map();
         let topBadges = [];
-        
         // === АДМИН ===
         let adminClickTimer = null;
 
-        // Навешиваем обработчик на кнопку админа
+        function updateAdminButtonText() {
+            const btn = document.getElementById('adminToggleBtn');
+            if (isAdmin) {
+                btn.textContent = isMobile ? '👑' : '👑 Админ (выход)';
+            } else {
+                btn.textContent = isMobile ? '🔑' : '🔑 Админ';
+            }
+        }
+
         document.getElementById('adminToggleBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             
-            const btn = document.getElementById('adminToggleBtn');
-            
             if (isAdmin) {
-                // Если уже админ — выходим
                 isAdmin = false;
-                btn.classList.remove('admin-active');
-                btn.textContent = '🔑 Админ';
+                document.getElementById('adminToggleBtn').classList.remove('admin-active');
+                updateAdminButtonText();
                 hideAllDeleteButtons();
                 updateCooldownButton();
                 showNotification('👋 Админ-режим выключен');
                 return;
             }
             
-            // Двойной клик для входа
             if (!adminClickTimer) {
                 adminClickTimer = setTimeout(() => {
                     adminClickTimer = null;
@@ -806,9 +1039,8 @@
 
         function activateAdmin() {
             isAdmin = true;
-            const btn = document.getElementById('adminToggleBtn');
-            btn.classList.add('admin-active');
-            btn.textContent = '👑 Админ (выход)';
+            document.getElementById('adminToggleBtn').classList.add('admin-active');
+            updateAdminButtonText();
             showAllDeleteButtons();
             updateCooldownButton();
             
@@ -837,17 +1069,22 @@
             btn.className = 'delete-btn visible';
             btn.textContent = '×';
             btn.title = 'Удалить растение';
-            btn.addEventListener('click', (e) => {
+            
+            const deleteHandler = (e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 deletePlant(plantData);
-            });
+            };
+            
+            btn.addEventListener('click', deleteHandler);
+            btn.addEventListener('touchend', deleteHandler);
             plantData.el.appendChild(btn);
         }
         
         function deletePlant(plantData) {
             plantData.giftedFireflies.forEach(f => f.remove());
             plantData.el.remove();
+            deletePlantFromFirebase(plantData);
             const index = allPlants.indexOf(plantData);
             if (index > -1) {
                 allPlants.splice(index, 1);
@@ -917,37 +1154,56 @@
         // === DRAG ===
         let isDragging = false, startX, startY, startMapX, startMapY;
         
-        viewport.addEventListener('mousedown', (e) => {
+        function onDragStart(e) {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
             if (e.target.closest('.plant-wrapper')) return;
             if (e.target.closest('.top-panel')) return;
             if (e.target.closest('.input-panel')) return;
             if (e.target.closest('.delete-btn')) return;
             if (e.target.closest('.admin-login-menu')) return;
+            
             isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            startX = clientX;
+            startY = clientY;
             startMapX = mapX;
             startMapY = mapY;
-            viewport.style.cursor = 'grabbing';
+            viewport.classList.add('grabbing');
             hideTooltip();
-        });
+        }
         
-        window.addEventListener('mousemove', (e) => {
+        function onDragMove(e) {
             if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const dx = clientX - startX;
+            const dy = clientY - startY;
             mapX = startMapX + dx;
             mapY = startMapY + dy;
             clampMapPosition();
             applyTransform();
-        });
+        }
         
-        window.addEventListener('mouseup', () => {
+        function onDragEnd() {
             if (isDragging) {
                 isDragging = false;
-                viewport.style.cursor = 'grab';
+                viewport.classList.remove('grabbing');
             }
-        });
+        }
+        
+        viewport.addEventListener('mousedown', onDragStart);
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+        
+        viewport.addEventListener('touchstart', onDragStart, {passive: false});
+        window.addEventListener('touchmove', onDragMove, {passive: false});
+        window.addEventListener('touchend', onDragEnd);
+        
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
         
         // === УВЕДОМЛЕНИЯ ===
         function showNotification(t, d = 2000) {
@@ -990,7 +1246,6 @@
             if (top[2]) setTimeout(() => { centerOnPlant(top[2].x, top[2].y); highlightPlant(top[2]); showNotification(`🥉 3 место: ${top[2].emoji} ${top[2].name} (${top[2].fireflies + top[2].watered})`, 3000); }, 5000);
             setTimeout(clearTopBadges, 8000);
         }
-        
         // === ТУЛТИП ===
         function showTooltip(e, plantData) {
             hideTooltip();
@@ -1007,15 +1262,17 @@
                 <div class="tooltip-actions"><span>💧 ${plantData.watered}/${isAdmin ? '∞' : MAX_WATER}</span><span>✨ ${plantData.fireflies}/${isAdmin ? '∞' : MAX_FIREFLIES}</span><span>⭐ ${plantData.fireflies + plantData.watered}</span></div>
                 ${w}
                 ${isAdmin ? '<div style="font-size:10px;color:#ff9a9a;margin-top:4px;">👑 Админ: без ограничений</div>' : ''}
-                <div style="font-size:10px;color:#5a7a5a;margin-top:4px;">💧 клик — полить &nbsp;|&nbsp; ✨ двойной клик — светлячок</div>`;
+                <div style="font-size:10px;color:#5a7a5a;margin-top:4px;">💧 тап — полить &nbsp;|&nbsp; ✨ двойной тап — светлячок</div>`;
             document.body.appendChild(tip);
             positionTooltip(e);
             activeTooltip = tip;
         }
         function positionTooltip(e) {
             if (!activeTooltip) return;
-            let l = e.clientX + 20, t = e.clientY - 30;
-            if (l + 290 > window.innerWidth) l = e.clientX - 300;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let l = clientX + 20, t = clientY - 30;
+            if (l + 290 > window.innerWidth) l = clientX - 300;
             if (t < 10) t = 10;
             activeTooltip.style.left = l + 'px';
             activeTooltip.style.top = t + 'px';
@@ -1118,6 +1375,7 @@
             if (!isAdmin && plantData.watered >= MAX_WATER) { showNotification('🌱 Полив исчерпан'); return; }
             plantData.watered++;
             updatePlantIndicators(plantData);
+            updatePlantOnFirebase(plantData);
             const r = plantData.el.getBoundingClientRect();
             for (let i = 0; i < 6; i++) {
                 const d = document.createElement('div');
@@ -1140,6 +1398,7 @@
             if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) { showNotification('✨ Уже есть светлячок'); return; }
             plantData.fireflies++;
             updatePlantIndicators(plantData);
+            updatePlantOnFirebase(plantData);
             const r = plantData.el.getBoundingClientRect();
             const gifted = document.createElement('div');
             gifted.className = 'gifted-firefly';
@@ -1398,7 +1657,6 @@
             
             return c.toDataURL();
         }
-        
         // === КУЛДАУН ===
         function updateCooldownButton() {
             const btn = document.querySelector('.input-panel button');
@@ -1433,6 +1691,47 @@
                 if (!cooldownTimer) {
                     cooldownTimer = setInterval(updateCooldownButton, 1000);
                 }
+            }
+        }
+        
+        function setupPlantInteractions(plantData) {
+            let lastTap = 0;
+            
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (e.target.closest('.delete-btn')) return;
+                handlePlantInteraction(plantData, e);
+            });
+            
+            wrapper.addEventListener('touchend', (e) => {
+                if (e.target.closest('.delete-btn')) return;
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    giftFirefly(plantData);
+                } else {
+                    e.stopPropagation();
+                    handlePlantInteraction(plantData, e);
+                }
+                lastTap = now;
+            });
+            
+            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
+            wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
+            wrapper.addEventListener('mouseleave', () => hideTooltip());
+        }
+        
+        function handlePlantInteraction(plantData, e) {
+            if (clickTimers.has(plantData)) {
+                clearTimeout(clickTimers.get(plantData));
+                clickTimers.delete(plantData);
+                giftFirefly(plantData);
+            } else {
+                clickTimers.set(plantData, setTimeout(() => {
+                    clickTimers.delete(plantData);
+                    waterPlant(plantData, e);
+                }, 300));
             }
         }
         
@@ -1491,31 +1790,19 @@
             const plantData = {
                 x: px, y: py, el: wrapper, text: text,
                 name: plant.name, emoji: plant.emoji, type: plant.type,
-                watered: 0, fireflies: 0, giftedFireflies: [], plantedAt: Date.now()
+                watered: 0, fireflies: 0, giftedFireflies: [], plantedAt: Date.now(),
+                firebaseId: null
             };
             
-            wrapper.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (e.target.closest('.delete-btn')) return;
-                if (clickTimers.has(plantData)) {
-                    clearTimeout(clickTimers.get(plantData));
-                    clickTimers.delete(plantData);
-                    giftFirefly(plantData);
-                } else {
-                    clickTimers.set(plantData, setTimeout(() => {
-                        clickTimers.delete(plantData);
-                        waterPlant(plantData, e);
-                    }, 300));
-                }
-            });
-            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
-            wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
-            wrapper.addEventListener('mouseleave', () => hideTooltip());
+            setupPlantInteractions(plantData);
             
             meadowLayer.appendChild(wrapper);
             allPlants.push(plantData);
             plantCount++;
             document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
+            
+            // Сохраняем в Firebase
+            savePlantToFirebase(plantData);
             
             if (isAdmin) {
                 addDeleteButton(plantData);
@@ -1537,11 +1824,23 @@
             if (e.key === 'Enter') plantSeed();
         });
         
-        setTimeout(() => {
-            const legend = document.getElementById('legend');
-            legend.classList.add('visible');
-            setTimeout(() => legend.classList.remove('visible'), 6000);
-        }, 1000);
+        document.getElementById('btnTop3').addEventListener('click', showTop3);
+        document.getElementById('btnFindGarden').addEventListener('click', findGarden);
+        
+        // === ЗАПУСК ===
+        function init() {
+            setupOnlineStatus();
+            setupPlantsSync();
+            updateAdminButtonText();
+            
+            setTimeout(() => {
+                const legend = document.getElementById('legend');
+                legend.classList.add('visible');
+                setTimeout(() => legend.classList.remove('visible'), 6000);
+            }, 1000);
+        }
+        
+        init();
     </script>
 </body>
 </html>
