@@ -296,21 +296,32 @@
         .delete-btn.visible { display: block; }
         .tooltip {
             position: fixed;
-            background: rgba(0,0,0,0.92);
+            background: rgba(0,0,0,0.95);
             color: #c8e6c0;
-            padding: 12px 16px; border-radius: 12px;
-            font-size: 13px; pointer-events: none; z-index: 100;
-            border: 1px solid rgba(100,180,100,0.3);
-            max-width: 280px; word-wrap: break-word;
-            white-space: pre-wrap; line-height: 1.5;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+            border: 1px solid rgba(100,180,100,0.5);
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
         }
         .tooltip .tooltip-actions {
-            margin-top: 8px; font-size: 11px;
-            color: #7a9a7a; display: flex; gap: 12px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #7a9a7a;
+            display: flex; gap: 14px;
+            flex-wrap: wrap;
         }
         .tooltip .water-limit-warning {
-            color: #ff9a6c; font-size: 10px; margin-top: 4px; font-style: italic;
+            color: #ff9a6c;
+            font-size: 11px;
+            margin-top: 6px;
+            font-style: italic;
         }
         .legend {
             position: fixed;
@@ -378,7 +389,7 @@
             .online-indicator { top: 35px; right: 15px; font-size: 10px; }
             .top-panel { top: 50px; right: 10px; gap: 4px; }
             .top-btn { padding: 6px 10px; font-size: 10px; border-radius: 15px; }
-            .tooltip { font-size: 12px; max-width: 220px; padding: 10px 12px; }
+            .tooltip { font-size: 13px; max-width: 260px; padding: 12px 14px; }
             .legend { bottom: 80px; font-size: 9px; }
             .notification { top: 45px; font-size: 12px; padding: 8px 16px; }
             .moon { width: 50px; height: 50px; top: 10%; right: 10%; }
@@ -393,6 +404,7 @@
             .hint { top: 10px; font-size: 10px; }
             .counter { top: 10px; font-size: 10px; }
             .online-indicator { top: 25px; font-size: 9px; }
+            .tooltip { font-size: 12px; max-width: 220px; padding: 10px 12px; }
         }
     </style>
 </head>
@@ -594,11 +606,31 @@
         function setupOnlineStatus() {
             const userRef = ref(db, 'online/' + myUserId);
             set(userRef, { lastSeen: Date.now() });
-            window.addEventListener('beforeunload', () => remove(userRef));
+            const heartbeat = setInterval(() => {
+                set(userRef, { lastSeen: Date.now() });
+            }, 10000);
+            window.addEventListener('beforeunload', () => {
+                clearInterval(heartbeat);
+                remove(userRef);
+            });
+            setInterval(() => {
+                const onlineListRef = ref(db, 'online');
+                onValue(onlineListRef, (snapshot) => {
+                    const data = snapshot.val() || {};
+                    const now = Date.now();
+                    Object.entries(data).forEach(([userId, userData]) => {
+                        if (now - userData.lastSeen > 15000) {
+                            remove(ref(db, 'online/' + userId));
+                        }
+                    });
+                }, { onlyOnce: true });
+            }, 5000);
             const onlineListRef = ref(db, 'online');
             onValue(onlineListRef, (snapshot) => {
                 const data = snapshot.val() || {};
-                onlineCount = Object.keys(data).length;
+                const now = Date.now();
+                const active = Object.values(data).filter(d => now - d.lastSeen <= 15000);
+                onlineCount = active.length;
                 document.getElementById('onlineCount').textContent = onlineCount + ' онлайн';
             });
         }
@@ -909,18 +941,24 @@
         function showTooltip(e, plantData) {
             hideTooltip();
             const tip = document.createElement('div');
-            tip.className = 'tooltip'; tip.id = 'activeTooltip';
-            const truncated = plantData.text.length > 150 ? plantData.text.substring(0,150)+'...' : plantData.text;
+            tip.className = 'tooltip';
+            tip.id = 'activeTooltip';
+            const truncated = plantData.text.length > 150 ? plantData.text.substring(0, 150) + '...' : plantData.text;
             let w = '';
             if (!isAdmin && plantData.watered >= MAX_WATER) w += '<div class="water-limit-warning">🚫 Полив исчерпан</div>';
             if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) w += '<div class="water-limit-warning">✨ Светлячок уже тут</div>';
+            const plantIndex = allPlants.indexOf(plantData) + 1;
             tip.innerHTML = `
-                <div style="margin-bottom:4px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:10px;color:#5a8a5a;">#${allPlants.indexOf(plantData)+1}</span></div>
-                <div style="color:#a0c0a0;font-style:italic;">«${escapeHtml(truncated)}»</div>
-                <div class="tooltip-actions"><span>💧 ${plantData.watered}/${isAdmin ? '∞' : MAX_WATER}</span><span>✨ ${plantData.fireflies}/${isAdmin ? '∞' : MAX_FIREFLIES}</span><span>⭐ ${plantData.fireflies + plantData.watered}</span></div>
+                <div style="margin-bottom:6px; font-size:15px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:11px;color:#5a8a5a;">#${plantIndex}</span></div>
+                <div style="color:#a0c0a0;font-style:italic; font-size:13px; line-height:1.5;">«${escapeHtml(truncated)}»</div>
+                <div class="tooltip-actions">
+                    <span>💧 ${plantData.watered}/${isAdmin ? '∞' : MAX_WATER}</span>
+                    <span>✨ ${plantData.fireflies}/${isAdmin ? '∞' : MAX_FIREFLIES}</span>
+                    <span>⭐ ${plantData.fireflies + plantData.watered}</span>
+                </div>
                 ${w}
-                ${isAdmin ? '<div style="font-size:10px;color:#ff9a9a;margin-top:4px;">👑 Админ: без ограничений</div>' : ''}
-                <div style="font-size:10px;color:#5a7a5a;margin-top:4px;">💧 тап — полить &nbsp;|&nbsp; ✨ двойной тап — светлячок</div>`;
+                ${isAdmin ? '<div style="font-size:11px;color:#ff9a9a;margin-top:6px;">👑 Админ: без ограничений</div>' : ''}
+                <div style="font-size:11px;color:#5a7a5a;margin-top:6px;">💧 тап — полить &nbsp;|&nbsp; ✨ двойной тап — светлячок</div>`;
             document.body.appendChild(tip);
             positionTooltip(e);
             activeTooltip = tip;
@@ -1308,27 +1346,57 @@
         function setupPlantInteractions(plantData) {
             const wrapper = plantData.el;
             let lastTap = 0;
+            let tapTimeout = null;
+            
             wrapper.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (e.target.closest('.delete-btn')) return;
                 handlePlantInteraction(plantData, e);
             });
+            
             wrapper.addEventListener('touchend', (e) => {
                 if (e.target.closest('.delete-btn')) return;
+                e.stopPropagation();
+                e.preventDefault();
+                
                 const now = Date.now();
-                if (now - lastTap < 300) {
-                    e.stopPropagation();
-                    e.preventDefault();
+                const timeSinceLastTap = now - lastTap;
+                
+                if (timeSinceLastTap < 400 && timeSinceLastTap > 50) {
+                    clearTimeout(tapTimeout);
+                    tapTimeout = null;
+                    lastTap = 0;
                     giftFirefly(plantData);
                 } else {
-                    e.stopPropagation();
-                    handlePlantInteraction(plantData, e);
+                    lastTap = now;
+                    clearTimeout(tapTimeout);
+                    tapTimeout = setTimeout(() => {
+                        waterPlant(plantData, e);
+                        lastTap = 0;
+                        tapTimeout = null;
+                    }, 400);
                 }
-                lastTap = now;
             });
+            
             wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
             wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
             wrapper.addEventListener('mouseleave', () => hideTooltip());
+            
+            let longPressTimer = null;
+            wrapper.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.delete-btn')) return;
+                longPressTimer = setTimeout(() => {
+                    showTooltip(e, plantData);
+                    setTimeout(() => hideTooltip(), 2000);
+                }, 500);
+            });
+            wrapper.addEventListener('touchmove', () => {
+                clearTimeout(longPressTimer);
+                hideTooltip();
+            });
+            wrapper.addEventListener('touchend', () => {
+                clearTimeout(longPressTimer);
+            });
         }
 
         function handlePlantInteraction(plantData, e) {
