@@ -1118,7 +1118,18 @@
         document.getElementById('btnTop3').addEventListener('click', showTop3);
         document.getElementById('btnFindGarden').addEventListener('click', findGarden);
 
-        function init() { setupOnlineStatus(); setupPlantsSync(); updateAdminButtonText(); updateCooldownButton(); setTimeout(() => { const legend = document.getElementById('legend'); legend.classList.add('visible'); setTimeout(() => legend.classList.remove('visible'), 6000); }, 1000); }
+        function init() {
+            setupOnlineStatus();
+            setupPlantsSync();
+            updateAdminButtonText();
+            updateCooldownButton();
+            showNotification('💭 Напиши то, что не отправил...', 4000);
+            setTimeout(() => {
+                const legend = document.getElementById('legend');
+                legend.classList.add('visible');
+                setTimeout(() => legend.classList.remove('visible'), 6000);
+            }, 1500);
+        }
         init();
     </script>
 </body>
