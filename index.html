@@ -433,7 +433,7 @@
         <button class="top-btn admin-btn" id="adminToggleBtn">🔑 Админ</button>
     </div>
     <div class="legend" id="legend">
-        💧 тап — меню &nbsp;|&nbsp; 📱 долгий тап — прочитать
+        📱 тап — меню &nbsp;|&nbsp; 📱 двойной тап — текст &nbsp;|&nbsp; 🖥️ наведи — текст
     </div>
     <div class="notification" id="notification"></div>
     <div class="admin-notification" id="adminNotification">👑 Администратор на сервере</div>
@@ -606,22 +606,15 @@
         function setupOnlineStatus() {
             const userRef = ref(db, 'online/' + myUserId);
             set(userRef, { lastSeen: Date.now() });
-            const heartbeat = setInterval(() => {
-                set(userRef, { lastSeen: Date.now() });
-            }, 10000);
-            window.addEventListener('beforeunload', () => {
-                clearInterval(heartbeat);
-                remove(userRef);
-            });
+            const heartbeat = setInterval(() => { set(userRef, { lastSeen: Date.now() }); }, 10000);
+            window.addEventListener('beforeunload', () => { clearInterval(heartbeat); remove(userRef); });
             setInterval(() => {
                 const onlineListRef = ref(db, 'online');
                 onValue(onlineListRef, (snapshot) => {
                     const data = snapshot.val() || {};
                     const now = Date.now();
                     Object.entries(data).forEach(([userId, userData]) => {
-                        if (now - userData.lastSeen > 15000) {
-                            remove(ref(db, 'online/' + userId));
-                        }
+                        if (now - userData.lastSeen > 15000) remove(ref(db, 'online/' + userId));
                     });
                 }, { onlyOnce: true });
             }, 5000);
@@ -651,11 +644,8 @@
                 });
                 serverPlants.forEach(serverPlant => {
                     const existing = allPlants.find(p => p.firebaseId === serverPlant.firebaseId);
-                    if (!existing) {
-                        createPlantFromServer(serverPlant);
-                    } else {
-                        updatePlantFromServer(existing, serverPlant);
-                    }
+                    if (!existing) { createPlantFromServer(serverPlant); }
+                    else { updatePlantFromServer(existing, serverPlant); }
                 });
                 plantCount = allPlants.length;
                 document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
@@ -673,15 +663,14 @@
             wrapper.style.width = '70px';
             wrapper.style.height = '120px';
             const img = document.createElement('img');
-            img.src = imgSrc;
-            img.className = 'plant-img';
-            img.style.width = '70px';
-            img.style.height = '100px';
+            img.src = imgSrc; img.className = 'plant-img';
+            img.style.width = '70px'; img.style.height = '100px';
             wrapper.appendChild(img);
             const plantData = {
                 x: data.x, y: data.y, el: wrapper, text: data.text,
                 name: plant.name, emoji: plant.emoji, type: data.type,
-                watered: data.watered || 0, fireflies: data.fireflies || 0,
+                wateredBy: data.wateredBy || [],
+                fireflyBy: data.fireflyBy || [],
                 giftedFireflies: [], plantedAt: data.plantedAt || Date.now(),
                 firebaseId: data.firebaseId
             };
@@ -692,11 +681,9 @@
         }
 
         function updatePlantFromServer(localPlant, serverPlant) {
-            if (serverPlant.watered !== localPlant.watered || serverPlant.fireflies !== localPlant.fireflies) {
-                localPlant.watered = serverPlant.watered || 0;
-                localPlant.fireflies = serverPlant.fireflies || 0;
-                updatePlantIndicators(localPlant);
-            }
+            localPlant.wateredBy = serverPlant.wateredBy || [];
+            localPlant.fireflyBy = serverPlant.fireflyBy || [];
+            updatePlantIndicators(localPlant);
         }
 
         function savePlantToFirebase(plantData) {
@@ -705,8 +692,10 @@
             plantData.firebaseId = firebaseId;
             set(newPlantRef, {
                 x: plantData.x, y: plantData.y, text: plantData.text,
-                type: plantData.type, watered: plantData.watered,
-                fireflies: plantData.fireflies, plantedAt: plantData.plantedAt
+                type: plantData.type,
+                wateredBy: [myUserId],
+                fireflyBy: [],
+                plantedAt: plantData.plantedAt
             });
         }
 
@@ -714,8 +703,10 @@
             if (!plantData.firebaseId) return;
             set(ref(db, 'plants/' + plantData.firebaseId), {
                 x: plantData.x, y: plantData.y, text: plantData.text,
-                type: plantData.type, watered: plantData.watered,
-                fireflies: plantData.fireflies, plantedAt: plantData.plantedAt
+                type: plantData.type,
+                wateredBy: plantData.wateredBy || [],
+                fireflyBy: plantData.fireflyBy || [],
+                plantedAt: plantData.plantedAt
             });
         }
 
@@ -728,113 +719,57 @@
         let adminClickTimer = null;
         function updateAdminButtonText() {
             const btn = document.getElementById('adminToggleBtn');
-            if (isAdmin) {
-                btn.textContent = isMobile ? '👑' : '👑 Админ (выход)';
-            } else {
-                btn.textContent = isMobile ? '🔑' : '🔑 Админ';
-            }
+            if (isAdmin) btn.textContent = isMobile ? '👑' : '👑 Админ (выход)';
+            else btn.textContent = isMobile ? '🔑' : '🔑 Админ';
         }
-
         document.getElementById('adminToggleBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             if (isAdmin) {
                 isAdmin = false;
                 document.getElementById('adminToggleBtn').classList.remove('admin-active');
-                updateAdminButtonText();
-                hideAllDeleteButtons();
-                updateCooldownButton();
+                updateAdminButtonText(); hideAllDeleteButtons(); updateCooldownButton();
                 showNotification('👋 Админ-режим выключен');
                 return;
             }
-            if (!adminClickTimer) {
-                adminClickTimer = setTimeout(() => { adminClickTimer = null; }, 400);
-                return;
-            }
-            clearTimeout(adminClickTimer);
-            adminClickTimer = null;
+            if (!adminClickTimer) { adminClickTimer = setTimeout(() => { adminClickTimer = null; }, 400); return; }
+            clearTimeout(adminClickTimer); adminClickTimer = null;
             showAdminLoginMenu();
         });
-
         function showAdminLoginMenu() {
             const oldMenu = document.querySelector('.admin-login-menu');
             if (oldMenu) oldMenu.remove();
             const menu = document.createElement('div');
             menu.className = 'admin-login-menu';
-            menu.style.cssText = `
-                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 300;
-                background: rgba(20, 5, 5, 0.97); border: 2px solid rgba(255, 100, 100, 0.5);
-                border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 10px;
-                pointer-events: auto; backdrop-filter: blur(15px); min-width: 250px;
-            `;
-            menu.innerHTML = `
-                <div style="color:#ff9a9a; text-align:center; font-size:14px;">🔐 Вход в админ-режим</div>
-                <input type="password" id="adminPasswordInput" placeholder="Введите пароль..." 
-                    style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,100,100,0.3); color: #ffcccc; 
-                    padding: 10px; border-radius: 8px; font-family: 'Georgia', serif; font-size: 14px; outline: none;">
-                <div style="display: flex; gap: 8px;">
-                    <button id="adminLoginBtn" style="flex:1; background: rgba(200,50,50,0.8); color: #fff; border: none; 
-                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Войти 👑</button>
-                    <button id="adminCancelBtn" style="flex:1; background: rgba(100,100,100,0.5); color: #ccc; border: none; 
-                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Отмена</button>
-                </div>
-                <div id="adminLoginError" style="color:#ff4444; font-size:11px; text-align:center; display:none;"></div>
-            `;
+            menu.style.cssText = `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 300; background: rgba(20, 5, 5, 0.97); border: 2px solid rgba(255, 100, 100, 0.5); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 10px; pointer-events: auto; backdrop-filter: blur(15px); min-width: 250px;`;
+            menu.innerHTML = `<div style="color:#ff9a9a; text-align:center; font-size:14px;">🔐 Вход в админ-режим</div><input type="password" id="adminPasswordInput" placeholder="Введите пароль..." style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,100,100,0.3); color: #ffcccc; padding: 10px; border-radius: 8px; font-family: 'Georgia', serif; font-size: 14px; outline: none;"><div style="display: flex; gap: 8px;"><button id="adminLoginBtn" style="flex:1; background: rgba(200,50,50,0.8); color: #fff; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Войти 👑</button><button id="adminCancelBtn" style="flex:1; background: rgba(100,100,100,0.5); color: #ccc; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Отмена</button></div><div id="adminLoginError" style="color:#ff4444; font-size:11px; text-align:center; display:none;"></div>`;
             document.body.appendChild(menu);
             const input = document.getElementById('adminPasswordInput');
-            const loginBtn = document.getElementById('adminLoginBtn');
-            const cancelBtn = document.getElementById('adminCancelBtn');
-            const errorEl = document.getElementById('adminLoginError');
-            loginBtn.addEventListener('click', () => {
-                if (input.value === ADMIN_PASSWORD) { menu.remove(); activateAdmin(); }
-                else { errorEl.textContent = '❌ Неверный пароль'; errorEl.style.display = 'block'; input.value = ''; input.focus(); }
-            });
-            cancelBtn.addEventListener('click', () => menu.remove());
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') loginBtn.click();
-                if (e.key === 'Escape') menu.remove();
-            });
-            setTimeout(() => {
-                document.addEventListener('click', function closeMenu(e) {
-                    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
-                });
-            }, 100);
+            document.getElementById('adminLoginBtn').addEventListener('click', () => { if (input.value === ADMIN_PASSWORD) { menu.remove(); activateAdmin(); } else { document.getElementById('adminLoginError').textContent = '❌ Неверный пароль'; document.getElementById('adminLoginError').style.display = 'block'; input.value = ''; input.focus(); } });
+            document.getElementById('adminCancelBtn').addEventListener('click', () => menu.remove());
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('adminLoginBtn').click(); if (e.key === 'Escape') menu.remove(); });
+            setTimeout(() => { document.addEventListener('click', function closeMenu(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); } }); }, 100);
             setTimeout(() => input.focus(), 150);
         }
-
         function activateAdmin() {
             isAdmin = true;
             document.getElementById('adminToggleBtn').classList.add('admin-active');
-            updateAdminButtonText();
-            showAllDeleteButtons();
-            updateCooldownButton();
+            updateAdminButtonText(); showAllDeleteButtons(); updateCooldownButton();
             const adminNotif = document.getElementById('adminNotification');
-            adminNotif.classList.add('show');
-            setTimeout(() => adminNotif.classList.remove('show'), 3000);
+            adminNotif.classList.add('show'); setTimeout(() => adminNotif.classList.remove('show'), 3000);
             showNotification('👑 Администратор на сервере', 3000);
         }
-
         function hideAllDeleteButtons() { document.querySelectorAll('.delete-btn').forEach(b => b.remove()); }
         function showAllDeleteButtons() { allPlants.forEach(p => addDeleteButton(p)); }
-
         function addDeleteButton(plantData) {
-            const oldBtn = plantData.el.querySelector('.delete-btn');
-            if (oldBtn) oldBtn.remove();
-            const btn = document.createElement('button');
-            btn.className = 'delete-btn visible';
-            btn.textContent = '×';
-            btn.title = 'Удалить растение';
+            const oldBtn = plantData.el.querySelector('.delete-btn'); if (oldBtn) oldBtn.remove();
+            const btn = document.createElement('button'); btn.className = 'delete-btn visible'; btn.textContent = '×'; btn.title = 'Удалить растение';
             const handler = (e) => { e.stopPropagation(); e.preventDefault(); deletePlant(plantData); };
-            btn.addEventListener('click', handler);
-            btn.addEventListener('touchend', handler);
+            btn.addEventListener('click', handler); btn.addEventListener('touchend', handler);
             plantData.el.appendChild(btn);
         }
-
         function deletePlant(plantData) {
-            plantData.giftedFireflies.forEach(f => f.remove());
-            plantData.el.remove();
-            deletePlantFromFirebase(plantData);
-            const index = allPlants.indexOf(plantData);
-            if (index > -1) { allPlants.splice(index, 1); plantCount--; }
+            plantData.giftedFireflies.forEach(f => f.remove()); plantData.el.remove(); deletePlantFromFirebase(plantData);
+            const index = allPlants.indexOf(plantData); if (index > -1) { allPlants.splice(index, 1); plantCount--; }
             document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
             showNotification('🗑️ Растение удалено', 1500);
         }
@@ -859,11 +794,8 @@
         function centerOnPlant(px, py) {
             const vw = viewport.offsetWidth, vh = viewport.offsetHeight;
             let tx = -(px - vw/2), ty = -(py - vh/2);
-            tx = Math.min(0, Math.max(-MAP_WIDTH + vw, tx));
-            ty = Math.min(0, Math.max(-MAP_HEIGHT + vh, ty));
-            clampMapPosition();
-            applyTransform();
-            animateTo(tx, ty, 1000);
+            tx = Math.min(0, Math.max(-MAP_WIDTH + vw, tx)); ty = Math.min(0, Math.max(-MAP_HEIGHT + vh, ty));
+            clampMapPosition(); applyTransform(); animateTo(tx, ty, 1000);
         }
 
         // DRAG
@@ -871,27 +803,18 @@
         function onDragStart(e) {
             const cx = e.touches ? e.touches[0].clientX : e.clientX;
             const cy = e.touches ? e.touches[0].clientY : e.clientY;
-            if (e.target.closest('.plant-wrapper') || e.target.closest('.top-panel') || 
-                e.target.closest('.input-panel') || e.target.closest('.delete-btn') || 
-                e.target.closest('.admin-login-menu') || e.target.closest('.plant-menu')) return;
-            isDragging = true; startDragX = cx; startDragY = cy;
-            startMapX = mapX; startMapY = mapY;
-            viewport.classList.add('grabbing');
-            hideTooltip();
-            hideAllPlantMenus();
+            if (e.target.closest('.plant-wrapper') || e.target.closest('.top-panel') || e.target.closest('.input-panel') || e.target.closest('.delete-btn') || e.target.closest('.admin-login-menu') || e.target.closest('.plant-menu')) return;
+            isDragging = true; startDragX = cx; startDragY = cy; startMapX = mapX; startMapY = mapY;
+            viewport.classList.add('grabbing'); hideTooltip(); hideAllPlantMenus();
         }
         function onDragMove(e) {
             if (!isDragging) return;
             const cx = e.touches ? e.touches[0].clientX : e.clientX;
             const cy = e.touches ? e.touches[0].clientY : e.clientY;
-            mapX = startMapX + (cx - startDragX);
-            mapY = startMapY + (cy - startDragY);
-            clampMapPosition();
-            applyTransform();
+            mapX = startMapX + (cx - startDragX); mapY = startMapY + (cy - startDragY);
+            clampMapPosition(); applyTransform();
         }
-        function onDragEnd() {
-            if (isDragging) { isDragging = false; viewport.classList.remove('grabbing'); }
-        }
+        function onDragEnd() { if (isDragging) { isDragging = false; viewport.classList.remove('grabbing'); } }
         viewport.addEventListener('mousedown', onDragStart);
         window.addEventListener('mousemove', onDragMove);
         window.addEventListener('mouseup', onDragEnd);
@@ -899,82 +822,54 @@
         window.addEventListener('touchmove', onDragMove, {passive: false});
         window.addEventListener('touchend', onDragEnd);
         document.addEventListener('gesturestart', e => e.preventDefault());
-
-        // Закрытие меню по клику в любом месте
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) {
-                hideAllPlantMenus();
-            }
-        });
-        document.addEventListener('touchend', (e) => {
-            if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) {
-                setTimeout(hideAllPlantMenus, 100);
-            }
-        });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) hideAllPlantMenus(); });
+        document.addEventListener('touchend', (e) => { if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) setTimeout(hideAllPlantMenus, 100); });
 
         // УВЕДОМЛЕНИЯ
-        function showNotification(t, d = 2000) {
-            const n = document.getElementById('notification');
-            n.textContent = t; n.classList.add('show');
-            clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), d);
-        }
-
+        function showNotification(t, d = 2000) { const n = document.getElementById('notification'); n.textContent = t; n.classList.add('show'); clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), d); }
         function highlightPlant(p) { p.el.classList.add('highlight'); setTimeout(() => p.el.classList.remove('highlight'), 2400); }
         function clearTopBadges() { topBadges.forEach(b => b.remove()); topBadges = []; }
-
         function showTop3() {
             clearTopBadges();
             if (!allPlants.length) { showNotification('🌱 Сад пуст'); return; }
             const sorted = [...allPlants].sort((a, b) => {
-                const sa = a.fireflies + a.watered, sb = b.fireflies + b.watered;
+                const sa = (a.wateredBy?.length || 0) + (a.fireflyBy?.length || 0);
+                const sb = (b.wateredBy?.length || 0) + (b.fireflyBy?.length || 0);
                 if (sb !== sa) return sb - sa;
                 return b.plantedAt - a.plantedAt;
             });
             const top = sorted.slice(0, Math.min(3, sorted.length));
             const medals = ['🥇', '🥈', '🥉'];
             top.forEach((p, i) => {
-                const badge = document.createElement('div');
-                badge.className = 'top-badge'; badge.textContent = medals[i];
+                const badge = document.createElement('div'); badge.className = 'top-badge'; badge.textContent = medals[i];
                 p.el.appendChild(badge); topBadges.push(badge);
             });
-            if (top[0]) { centerOnPlant(top[0].x, top[0].y); highlightPlant(top[0]); showNotification(`🥇 1 место: ${top[0].emoji} ${top[0].name} (${top[0].fireflies + top[0].watered})`, 3000); }
-            if (top[1]) setTimeout(() => { centerOnPlant(top[1].x, top[1].y); highlightPlant(top[1]); showNotification(`🥈 2 место: ${top[1].emoji} ${top[1].name} (${top[1].fireflies + top[1].watered})`, 3000); }, 2500);
-            if (top[2]) setTimeout(() => { centerOnPlant(top[2].x, top[2].y); highlightPlant(top[2]); showNotification(`🥉 3 место: ${top[2].emoji} ${top[2].name} (${top[2].fireflies + top[2].watered})`, 3000); }, 5000);
+            const score = (p) => (p.wateredBy?.length || 0) + (p.fireflyBy?.length || 0);
+            if (top[0]) { centerOnPlant(top[0].x, top[0].y); highlightPlant(top[0]); showNotification(`🥇 1 место: ${top[0].emoji} ${top[0].name} (${score(top[0])})`, 3000); }
+            if (top[1]) setTimeout(() => { centerOnPlant(top[1].x, top[1].y); highlightPlant(top[1]); showNotification(`🥈 2 место: ${top[1].emoji} ${top[1].name} (${score(top[1])})`, 3000); }, 2500);
+            if (top[2]) setTimeout(() => { centerOnPlant(top[2].x, top[2].y); highlightPlant(top[2]); showNotification(`🥉 3 место: ${top[2].emoji} ${top[2].name} (${score(top[2])})`, 3000); }, 5000);
             setTimeout(clearTopBadges, 8000);
         }
-
         function findGarden() {
             if (!allPlants.length) { showNotification('🌱 Сад пуст'); return; }
-            let sx = 0, sy = 0;
-            allPlants.forEach(p => { sx += p.x; sy += p.y; });
+            let sx = 0, sy = 0; allPlants.forEach(p => { sx += p.x; sy += p.y; });
             centerOnPlant(sx / allPlants.length, sy / allPlants.length);
         }
 
         // ТУЛТИП
         function showTooltip(e, plantData) {
             hideTooltip();
-            const tip = document.createElement('div');
-            tip.className = 'tooltip';
-            tip.id = 'activeTooltip';
+            const tip = document.createElement('div'); tip.className = 'tooltip'; tip.id = 'activeTooltip';
             const truncated = plantData.text.length > 150 ? plantData.text.substring(0, 150) + '...' : plantData.text;
+            const myWaters = plantData.wateredBy ? plantData.wateredBy.filter(id => id === myUserId).length : 0;
+            const hasFirefly = plantData.fireflyBy ? plantData.fireflyBy.includes(myUserId) : false;
             let w = '';
-            if (!isAdmin && plantData.watered >= MAX_WATER) w += '<div class="water-limit-warning">🚫 Полив исчерпан</div>';
-            if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) w += '<div class="water-limit-warning">✨ Светлячок уже тут</div>';
+            if (!isAdmin && myWaters >= MAX_WATER) w += '<div class="water-limit-warning">🚫 Ты полил 3 раза</div>';
+            if (!isAdmin && hasFirefly) w += '<div class="water-limit-warning">✨ Ты отправил светлячка</div>';
             const plantIndex = allPlants.indexOf(plantData) + 1;
-            tip.innerHTML = `
-                <div style="margin-bottom:6px; font-size:15px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:11px;color:#5a8a5a;">#${plantIndex}</span></div>
-                <div style="color:#a0c0a0;font-style:italic; font-size:13px; line-height:1.5;">«${escapeHtml(truncated)}»</div>
-                <div class="tooltip-actions">
-                    <span>💧 ${plantData.watered}/${isAdmin ? '∞' : MAX_WATER}</span>
-                    <span>✨ ${plantData.fireflies}/${isAdmin ? '∞' : MAX_FIREFLIES}</span>
-                    <span>⭐ ${plantData.fireflies + plantData.watered}</span>
-                </div>
-                ${w}
-                ${isAdmin ? '<div style="font-size:11px;color:#ff9a9a;margin-top:6px;">👑 Админ: без ограничений</div>' : ''}
-                <div style="font-size:11px;color:#5a7a5a;margin-top:6px;">💧 тап — меню &nbsp;|&nbsp; 📱 долгий тап — прочитать</div>`;
-            document.body.appendChild(tip);
-            positionTooltip(e);
-            activeTooltip = tip;
+            const totalScore = (plantData.wateredBy?.length || 0) + (plantData.fireflyBy?.length || 0);
+            tip.innerHTML = `<div style="margin-bottom:6px; font-size:15px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:11px;color:#5a8a5a;">#${plantIndex}</span></div><div style="color:#a0c0a0;font-style:italic; font-size:13px; line-height:1.5;">«${escapeHtml(truncated)}»</div><div class="tooltip-actions"><span>💧 ${plantData.wateredBy?.length || 0} поливов</span><span>✨ ${plantData.fireflyBy?.length || 0} светлячков</span><span>⭐ ${totalScore}</span></div>${w}${isAdmin ? '<div style="font-size:11px;color:#ff9a9a;margin-top:6px;">👑 Админ: без ограничений</div>' : ''}<div style="font-size:11px;color:#5a7a5a;margin-top:6px;">📱 тап — меню &nbsp;|&nbsp; 📱 двойной тап — текст</div>`;
+            document.body.appendChild(tip); positionTooltip(e); activeTooltip = tip;
         }
         function positionTooltip(e) {
             if (!activeTooltip) return;
@@ -983,8 +878,7 @@
             let l = cx + 20, t = cy - 30;
             if (l + 290 > window.innerWidth) l = cx - 300;
             if (t < 10) t = 10;
-            activeTooltip.style.left = l + 'px';
-            activeTooltip.style.top = t + 'px';
+            activeTooltip.style.left = l + 'px'; activeTooltip.style.top = t + 'px';
         }
         function hideTooltip() { if (activeTooltip) { activeTooltip.remove(); activeTooltip = null; } }
         function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
@@ -997,25 +891,19 @@
             const whitelist = ['привет','пока','спасибо','благодарю','извини','прости','люблю','скучаю','обнимаю','целую','жаль','больно','грустно','радостно','одиноко','страшно','обидно','надеюсь','верю','мечтаю','хочу','могу','буду','помню','забыл','забыла','устал','устала','да','нет','ок','окей','ладно','хорошо','плохо','зачем','почему','когда','где','как','кто','что','приходи','уходи','останься','вернись','hi','hello','bye','sorry','love','miss','thanks','помоги','помогите','держись','всё','все','ничего','пустота','тишина','темнота','свет','тьма','ночь','день','утро','вечер','мама','папа','сын','дочь','брат','сестра','друг','подруга','дом','семья','счастье','горе','боль','радость','печаль','я','ты','мы','он','она','они','меня','тебя','нас'];
             const wordsOnly = lower.replace(/[^a-zа-яё\s]/g, '');
             if (whitelist.includes(wordsOnly)) return true;
-            for (const phrase of whitelist) {
-                if (wordsOnly.startsWith(phrase + ' ') || wordsOnly.startsWith(phrase + ',')) return true;
-            }
+            for (const phrase of whitelist) { if (wordsOnly.startsWith(phrase + ' ') || wordsOnly.startsWith(phrase + ',')) return true; }
             const letters = lower.match(/[а-яёa-z]/gi) || [];
             if (letters.length < 2) return false;
-            const charCount = {};
-            for (const c of lower) { charCount[c] = (charCount[c] || 0) + 1; }
+            const charCount = {}; for (const c of lower) { charCount[c] = (charCount[c] || 0) + 1; }
             if (Math.max(...Object.values(charCount)) / lower.length > 0.4) return false;
             if (/([a-zа-яё])\1\1/i.test(lower)) return false;
             const keyboardPatterns = ['qwerty','asdfgh','zxcvbn','йцукен','фывапр','ячсмит','qweqwe','asdasd','zxczxc','qweasd','asdzxc','йцуфыв','цукенг','вапрол','qazwsx','wsxedc','rfvtgb'];
             const lettersOnly = lower.replace(/[^a-zа-яё]/g, '');
             for (const pattern of keyboardPatterns) { if (lettersOnly.includes(pattern)) return false; }
             if (lettersOnly.length > 10) {
-                const freq = {};
-                for (const c of lettersOnly) { freq[c] = (freq[c] || 0) + 1; }
-                const freqs = Object.values(freq);
-                const avg = freqs.reduce((a,b)=>a+b,0) / freqs.length;
-                const variance = freqs.reduce((s,f)=>s+(f-avg)**2,0) / freqs.length;
-                if (freqs.length > 5 && variance < 0.3) return false;
+                const freq = {}; for (const c of lettersOnly) { freq[c] = (freq[c] || 0) + 1; }
+                const freqs = Object.values(freq); const avg = freqs.reduce((a,b)=>a+b,0) / freqs.length;
+                if (freqs.length > 5 && freqs.reduce((s,f)=>s+(f-avg)**2,0) / freqs.length < 0.3) return false;
             }
             if (lettersOnly.length > 8) {
                 const vowels = (lettersOnly.match(/[аеёиоуыэюяaeiou]/gi) || []).length;
@@ -1025,72 +913,63 @@
             }
             if (letters.length > 6) {
                 let switches = 0;
-                for (let i = 1; i < letters.length; i++) {
-                    if ((letters[i-1]===letters[i-1].toUpperCase()) !== (letters[i]===letters[i].toUpperCase())) switches++;
-                }
+                for (let i = 1; i < letters.length; i++) { if ((letters[i-1]===letters[i-1].toUpperCase()) !== (letters[i]===letters[i].toUpperCase())) switches++; }
                 if (switches >= letters.length * 0.5) return false;
-            }
-            if (text.length > 20 && !text.includes(' ')) {
-                const words = text.match(/[а-яёa-z]+/gi) || [];
-                if (words.length === 1 && words[0].length > 20) return false;
             }
             return true;
         }
 
         // ПОЛИВ И СВЕТЛЯЧКИ
         function waterPlant(plantData, e) {
-            if (!isAdmin && plantData.watered >= MAX_WATER) { showNotification('🌱 Полив исчерпан'); return; }
-            plantData.watered++;
+            if (!isAdmin) {
+                const myWaterCount = (plantData.wateredBy || []).filter(id => id === myUserId).length;
+                if (myWaterCount >= MAX_WATER) { showNotification('🌱 Ты уже полил 3 раза'); return; }
+            }
+            if (!plantData.wateredBy) plantData.wateredBy = [];
+            plantData.wateredBy.push(myUserId);
             updatePlantIndicators(plantData);
             updatePlantOnFirebase(plantData);
             const r = plantData.el.getBoundingClientRect();
             for (let i = 0; i < 6; i++) {
-                const d = document.createElement('div');
-                d.className = 'water-drop';
-                d.style.position = 'fixed';
-                d.style.left = (r.left + r.width/2 + (Math.random()-0.5)*40) + 'px';
-                d.style.top = (r.top + 30 + Math.random()*10) + 'px';
-                d.style.animationDelay = (Math.random()*0.3) + 's';
-                d.style.zIndex = '100';
-                document.body.appendChild(d);
-                setTimeout(() => d.remove(), 800);
+                const d = document.createElement('div'); d.className = 'water-drop';
+                d.style.position = 'fixed'; d.style.left = (r.left + r.width/2 + (Math.random()-0.5)*40) + 'px';
+                d.style.top = (r.top + 30 + Math.random()*10) + 'px'; d.style.animationDelay = (Math.random()*0.3) + 's';
+                d.style.zIndex = '100'; document.body.appendChild(d); setTimeout(() => d.remove(), 800);
             }
-            if (!isAdmin && plantData.watered >= MAX_WATER) showNotification('💧 Растение напилось');
-            if (isAdmin) showNotification('💧 Админ-полив', 1000);
+            showNotification('💧 Полив!', 1000);
             if (activeTooltip) showTooltip(e, plantData);
         }
 
         function giftFirefly(plantData) {
-            if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) { showNotification('✨ Уже есть светлячок'); return; }
-            plantData.fireflies++;
+            if (!isAdmin) {
+                if ((plantData.fireflyBy || []).includes(myUserId)) { showNotification('✨ Ты уже отправил светлячка'); return; }
+            }
+            if (!plantData.fireflyBy) plantData.fireflyBy = [];
+            plantData.fireflyBy.push(myUserId);
             updatePlantIndicators(plantData);
             updatePlantOnFirebase(plantData);
             const r = plantData.el.getBoundingClientRect();
-            const gifted = document.createElement('div');
-            gifted.className = 'gifted-firefly';
-            gifted.style.position = 'fixed';
-            gifted.style.left = (r.left + r.width/2) + 'px';
-            gifted.style.top = (r.top + r.height/2) + 'px';
-            gifted.style.zIndex = '100';
+            const gifted = document.createElement('div'); gifted.className = 'gifted-firefly';
+            gifted.style.position = 'fixed'; gifted.style.left = (r.left + r.width/2) + 'px';
+            gifted.style.top = (r.top + r.height/2) + 'px'; gifted.style.zIndex = '100';
             document.body.appendChild(gifted);
-            const mf = document.createElement('div');
-            mf.className = 'gifted-firefly';
+            const mf = document.createElement('div'); mf.className = 'gifted-firefly';
             mf.style.left = (plantData.x + (Math.random()-0.5)*30) + 'px';
             mf.style.top = (plantData.y - 15 + (Math.random()-0.5)*20) + 'px';
-            meadowLayer.appendChild(mf);
-            plantData.giftedFireflies.push(mf);
+            meadowLayer.appendChild(mf); plantData.giftedFireflies.push(mf);
             setTimeout(() => gifted.remove(), 1000);
-            if (isAdmin) showNotification('✨ Админ-светлячок', 1000);
-            if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) showNotification('✨ Светлячок остался');
+            showNotification('✨ Светлячок!', 1000);
         }
 
         function updatePlantIndicators(plantData) {
             const w = plantData.el;
             let ind = w.querySelector('.plant-indicators');
             if (!ind) { ind = document.createElement('div'); ind.className = 'plant-indicators'; w.appendChild(ind); }
+            const totalWaters = (plantData.wateredBy || []).length;
+            const totalFireflies = (plantData.fireflyBy || []).length;
             let h = '';
-            if (plantData.watered > 0) h += '<span>💧'+plantData.watered+'</span> ';
-            if (plantData.fireflies > 0) h += '<span>✨'+plantData.fireflies+'</span>';
+            if (totalWaters > 0) h += '<span>💧'+totalWaters+'</span> ';
+            if (totalFireflies > 0) h += '<span>✨'+totalFireflies+'</span>';
             ind.innerHTML = h;
         }
 
@@ -1098,502 +977,132 @@
 
         // РАСШИРЕНИЕ ЛУГА
         function expandMeadow(direction) {
-            switch(direction) {
-                case 'right': MAP_WIDTH += EXPAND_STEP; break;
-                case 'left': MAP_WIDTH += EXPAND_STEP; mapX -= EXPAND_STEP; break;
-                case 'down': MAP_HEIGHT += EXPAND_STEP; break;
-                case 'up': MAP_HEIGHT += EXPAND_STEP; mapY -= EXPAND_STEP; break;
-            }
-            updateMeadowSize();
-            spawnBackgroundFireflies();
-            clampMapPosition();
-            applyTransform();
+            switch(direction) { case 'right': MAP_WIDTH += EXPAND_STEP; break; case 'left': MAP_WIDTH += EXPAND_STEP; mapX -= EXPAND_STEP; break; case 'down': MAP_HEIGHT += EXPAND_STEP; break; case 'up': MAP_HEIGHT += EXPAND_STEP; mapY -= EXPAND_STEP; break; }
+            updateMeadowSize(); spawnBackgroundFireflies(); clampMapPosition(); applyTransform();
             showNotification('🌍 Луг расширился!', 1500);
         }
-
         function findValidPosition(nearPlant) {
             for (let a = 0; a < 50; a++) {
-                const off = 200 + a*25;
-                const ang = Math.random()*Math.PI*2;
-                const dist = off + Math.random()*200;
-                const nx = nearPlant.x + Math.cos(ang)*dist;
-                const ny = nearPlant.y + Math.sin(ang)*dist;
+                const off = 200 + a*25; const ang = Math.random()*Math.PI*2; const dist = off + Math.random()*200;
+                const nx = nearPlant.x + Math.cos(ang)*dist; const ny = nearPlant.y + Math.sin(ang)*dist;
                 if (nx < 50 || ny < 50 || nx > MAP_WIDTH-50 || ny > MAP_HEIGHT*0.7) continue;
                 let tc = false;
-                for (const p of allPlants) {
-                    if (getDistance(nx, ny, p.x, p.y) < MIN_PLANT_DISTANCE) { tc = true; break; }
-                }
+                for (const p of allPlants) { if (getDistance(nx, ny, p.x, p.y) < MIN_PLANT_DISTANCE) { tc = true; break; } }
                 if (!tc) return { x: nx, y: ny };
             }
-            const dirs = ['right','left','down','up'];
-            const dir = dirs[Math.floor(Math.random()*dirs.length)];
+            const dirs = ['right','left','down','up']; const dir = dirs[Math.floor(Math.random()*dirs.length)];
             expandMeadow(dir);
-            const ang = Math.random()*Math.PI*2;
-            const dist = 400 + Math.random()*300;
-            let nx = nearPlant.x + Math.cos(ang)*dist;
-            let ny = nearPlant.y + Math.sin(ang)*dist;
-            if (dir === 'right') nx = MAP_WIDTH - 200;
-            else if (dir === 'left') nx = 200;
-            else if (dir === 'down') ny = MAP_HEIGHT*0.6;
-            else if (dir === 'up') ny = 200;
+            const ang = Math.random()*Math.PI*2; const dist = 400 + Math.random()*300;
+            let nx = nearPlant.x + Math.cos(ang)*dist; let ny = nearPlant.y + Math.sin(ang)*dist;
+            if (dir === 'right') nx = MAP_WIDTH - 200; else if (dir === 'left') nx = 200;
+            else if (dir === 'down') ny = MAP_HEIGHT*0.6; else if (dir === 'up') ny = 200;
             return { x: Math.max(100, Math.min(MAP_WIDTH-100, nx)), y: Math.max(50, Math.min(MAP_HEIGHT*0.7, ny)) };
         }
 
         // 20 ВИДОВ РАСТЕНИЙ
         const plants = [
-            {name:'Плакучая ива', color:'#7b9e7b', emoji:'🌿', type:'willow'},
-            {name:'Тёмный терновник', color:'#3a2030', emoji:'🥀', type:'thorn'},
-            {name:'Светящийся пион', color:'#f0c0d0', emoji:'🌸', type:'peony'},
-            {name:'Одинокий дуб', color:'#5a4a30', emoji:'🌳', type:'oak'},
-            {name:'Полевая ромашка', color:'#fafaf0', emoji:'🌼', type:'daisy'},
-            {name:'Дикий кактус', color:'#4a6a4a', emoji:'🌵', type:'cactus'},
-            {name:'Лунная лоза', color:'#9a9ac0', emoji:'🌙', type:'vine'},
-            {name:'Алая роза', color:'#c03040', emoji:'🌹', type:'rose'},
-            {name:'Серебряный ландыш', color:'#d0d8d0', emoji:'🪻', type:'lily'},
-            {name:'Лавандовый куст', color:'#9a7ab0', emoji:'💜', type:'lavender'},
-            {name:'Золотой подсолнух', color:'#e8b030', emoji:'🌻', type:'sunflower'},
-            {name:'Лесной папоротник', color:'#3a6a3a', emoji:'🌿', type:'fern'},
-            {name:'Вишнёвый цвет', color:'#f0b0c0', emoji:'🌸', type:'sakura'},
-            {name:'Ночная фиалка', color:'#6a4a8a', emoji:'💜', type:'violet'},
-            {name:'Красный мак', color:'#e04030', emoji:'🌺', type:'poppy'},
-            {name:'Белый лотос', color:'#f0f0e8', emoji:'🪷', type:'lotus'},
-            {name:'Горная сосна', color:'#3a5a3a', emoji:'🌲', type:'pine'},
-            {name:'Плакучая берёза', color:'#d0d8c0', emoji:'🌳', type:'birch'},
-            {name:'Дикая ежевика', color:'#4a2040', emoji:'🫐', type:'berry'},
-            {name:'Степной ковыль', color:'#c8c898', emoji:'🌾', type:'grass'}
+            {name:'Плакучая ива', color:'#7b9e7b', emoji:'🌿', type:'willow'},{name:'Тёмный терновник', color:'#3a2030', emoji:'🥀', type:'thorn'},
+            {name:'Светящийся пион', color:'#f0c0d0', emoji:'🌸', type:'peony'},{name:'Одинокий дуб', color:'#5a4a30', emoji:'🌳', type:'oak'},
+            {name:'Полевая ромашка', color:'#fafaf0', emoji:'🌼', type:'daisy'},{name:'Дикий кактус', color:'#4a6a4a', emoji:'🌵', type:'cactus'},
+            {name:'Лунная лоза', color:'#9a9ac0', emoji:'🌙', type:'vine'},{name:'Алая роза', color:'#c03040', emoji:'🌹', type:'rose'},
+            {name:'Серебряный ландыш', color:'#d0d8d0', emoji:'🪻', type:'lily'},{name:'Лавандовый куст', color:'#9a7ab0', emoji:'💜', type:'lavender'},
+            {name:'Золотой подсолнух', color:'#e8b030', emoji:'🌻', type:'sunflower'},{name:'Лесной папоротник', color:'#3a6a3a', emoji:'🌿', type:'fern'},
+            {name:'Вишнёвый цвет', color:'#f0b0c0', emoji:'🌸', type:'sakura'},{name:'Ночная фиалка', color:'#6a4a8a', emoji:'💜', type:'violet'},
+            {name:'Красный мак', color:'#e04030', emoji:'🌺', type:'poppy'},{name:'Белый лотос', color:'#f0f0e8', emoji:'🪷', type:'lotus'},
+            {name:'Горная сосна', color:'#3a5a3a', emoji:'🌲', type:'pine'},{name:'Плакучая берёза', color:'#d0d8c0', emoji:'🌳', type:'birch'},
+            {name:'Дикая ежевика', color:'#4a2040', emoji:'🫐', type:'berry'},{name:'Степной ковыль', color:'#c8c898', emoji:'🌾', type:'grass'}
         ];
-
-        function getPlantByText(text) {
-            return plants[Math.floor(Math.random() * plants.length)];
-        }
-
+        function getPlantByText(text) { return plants[Math.floor(Math.random() * plants.length)]; }
         function drawPlant(type, color) {
-            const c = document.createElement('canvas');
-            c.width = 80; c.height = 120;
-            const ctx = c.getContext('2d');
-            ctx.translate(40, 110);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.quadraticCurveTo(-10, -40, -5, -80);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            if (type === 'willow') {
-                for (let i = 0; i < 7; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -30-i*8);
-                    ctx.quadraticCurveTo(-20, -40-i*8, -15-i*3, -60-i*10);
-                    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-                }
-                ctx.beginPath(); ctx.arc(-5, -85, 22, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(123,158,123,0.7)'; ctx.fill();
-            } else if (type === 'thorn') {
-                for (let i = 0; i < 5; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3, -20-i*12);
-                    ctx.lineTo(10+i*3, -25-i*12); ctx.lineTo(-3, -30-i*12);
-                    ctx.fillStyle = '#4a1030'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.arc(-3, -80, 8, 0, Math.PI*2);
-                ctx.fillStyle = '#3a2030'; ctx.fill();
-            } else if (type === 'peony' || type === 'sakura') {
-                ctx.beginPath(); ctx.arc(-5, -85, 20, 0, Math.PI*2);
-                ctx.fillStyle = color + 'cc'; ctx.fill();
-                ctx.beginPath(); ctx.arc(-5, -85, 14, 0, Math.PI*2);
-                ctx.fillStyle = color; ctx.fill();
-                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2);
-                ctx.fillStyle = '#ffd700'; ctx.fill();
-            } else if (type === 'oak') {
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -70);
-                ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 6; ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, -80, 25, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(70,100,50,0.8)'; ctx.fill();
-            } else if (type === 'daisy') {
-                for (let a = 0; a < Math.PI*2; a += Math.PI/5) {
-                    ctx.beginPath();
-                    ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 8, 3, a, 0, Math.PI*2);
-                    ctx.fillStyle = '#fafaf0'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2);
-                ctx.fillStyle = '#ffd700'; ctx.fill();
-            } else if (type === 'cactus') {
-                ctx.fillStyle = '#4a6a4a';
-                ctx.fillRect(-8, -80, 16, 70);
-                ctx.fillRect(8, -65, 14, 8);
-                ctx.fillRect(-22, -55, 14, 8);
-                ctx.beginPath(); ctx.arc(0, -85, 6, 0, Math.PI*2);
-                ctx.fillStyle = '#ff69b4'; ctx.fill();
-            } else if (type === 'vine') {
-                for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -20-i*15);
-                    ctx.quadraticCurveTo(-25, -35-i*15, -15, -50-i*15);
-                    ctx.strokeStyle = '#9a9ac0'; ctx.lineWidth = 2; ctx.stroke();
-                }
-                ctx.beginPath(); ctx.arc(-10, -75, 10, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(180,180,220,0.6)'; ctx.fill();
-            } else if (type === 'rose') {
-                for (let i = 0; i < 4; i++) {
-                    ctx.beginPath();
-                    ctx.arc(-3+i*2, -82-i*3, 8+i*2, 0, Math.PI*2);
-                    ctx.fillStyle = `rgba(192,48,64,${0.3+i*0.15})`; ctx.fill();
-                }
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80);
-                ctx.strokeStyle = '#8a2030'; ctx.lineWidth = 2; ctx.stroke();
-            } else if (type === 'lily') {
-                for (let i = 0; i < 3; i++) {
-                    ctx.beginPath();
-                    ctx.ellipse(-5, -85, 16, 4, (i*Math.PI)/3, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(208,216,208,0.7)'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.arc(-5, -85, 4, 0, Math.PI*2);
-                ctx.fillStyle = '#f0e898'; ctx.fill();
-            } else if (type === 'lavender' || type === 'violet') {
-                for (let i = 0; i < 5; i++) {
-                    ctx.beginPath();
-                    ctx.arc(-5+(i-2)*6, -70-i*5, 5, 0, Math.PI*2);
-                    ctx.fillStyle = color; ctx.fill();
-                }
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80);
-                ctx.strokeStyle = '#5a5a5a'; ctx.lineWidth = 2; ctx.stroke();
-            } else if (type === 'sunflower') {
-                for (let a = 0; a < Math.PI*2; a += Math.PI/8) {
-                    ctx.beginPath();
-                    ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 6, 3, a, 0, Math.PI*2);
-                    ctx.fillStyle = '#e8b030'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.arc(-5, -85, 8, 0, Math.PI*2);
-                ctx.fillStyle = '#5a3a10'; ctx.fill();
-            } else if (type === 'fern') {
-                for (let i = 0; i < 6; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -25-i*10);
-                    ctx.quadraticCurveTo(-20, -30-i*10, -25, -40-i*10);
-                    ctx.strokeStyle = '#3a6a3a'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(-5, -25-i*10);
-                    ctx.quadraticCurveTo(10, -30-i*10, 15, -40-i*10);
-                    ctx.stroke();
-                }
-            } else if (type === 'poppy') {
-                for (let a = 0; a < Math.PI*2; a += Math.PI/2) {
-                    ctx.beginPath();
-                    ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*10, 10, 6, a, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(224,64,48,0.8)'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.arc(-5, -85, 5, 0, Math.PI*2);
-                ctx.fillStyle = '#1a1a1a'; ctx.fill();
-            } else if (type === 'lotus') {
-                for (let a = 0; a < Math.PI*2; a += Math.PI/5) {
-                    ctx.beginPath();
-                    ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*5, 8, 4, a, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(240,240,232,0.9)'; ctx.fill();
-                }
-            } else if (type === 'pine') {
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80);
-                ctx.strokeStyle = '#4a3a2a'; ctx.lineWidth = 4; ctx.stroke();
-                for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(0, -40-i*12);
-                    ctx.lineTo(-15, -50-i*12); ctx.lineTo(0, -55-i*12);
-                    ctx.lineTo(15, -50-i*12); ctx.closePath();
-                    ctx.fillStyle = '#3a5a3a'; ctx.fill();
-                }
-            } else if (type === 'birch') {
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -75);
-                ctx.strokeStyle = '#d0d8c0'; ctx.lineWidth = 5; ctx.stroke();
-                for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3, -25-i*15);
-                    ctx.lineTo(3, -25-i*15); ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1; ctx.stroke();
-                }
-                ctx.beginPath(); ctx.arc(0, -80, 18, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(200,210,180,0.6)'; ctx.fill();
-            } else if (type === 'berry') {
-                for (let i = 0; i < 6; i++) {
-                    ctx.beginPath();
-                    ctx.arc(-5+(Math.random()-0.5)*16, -60-Math.random()*25, 3, 0, Math.PI*2);
-                    ctx.fillStyle = '#6a3050'; ctx.fill();
-                }
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80);
-                ctx.strokeStyle = '#4a6a3a'; ctx.lineWidth = 2; ctx.stroke();
-            } else if (type === 'grass') {
-                for (let i = 0; i < 5; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3+i*3, 0);
-                    ctx.quadraticCurveTo(-5+i*3, -50, -8+i*6, -90);
-                    ctx.strokeStyle = '#c8c898'; ctx.lineWidth = 1.5; ctx.stroke();
-                }
-            }
+            const c = document.createElement('canvas'); c.width = 80; c.height = 120;
+            const ctx = c.getContext('2d'); ctx.translate(40, 110);
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-10, -40, -5, -80);
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+            if (type === 'willow') { for (let i = 0; i < 7; i++) { ctx.beginPath(); ctx.moveTo(-5, -30-i*8); ctx.quadraticCurveTo(-20, -40-i*8, -15-i*3, -60-i*10); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke(); } ctx.beginPath(); ctx.arc(-5, -85, 22, 0, Math.PI*2); ctx.fillStyle = 'rgba(123,158,123,0.7)'; ctx.fill(); }
+            else if (type === 'thorn') { for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-3, -20-i*12); ctx.lineTo(10+i*3, -25-i*12); ctx.lineTo(-3, -30-i*12); ctx.fillStyle = '#4a1030'; ctx.fill(); } ctx.beginPath(); ctx.arc(-3, -80, 8, 0, Math.PI*2); ctx.fillStyle = '#3a2030'; ctx.fill(); }
+            else if (type === 'peony' || type === 'sakura') { ctx.beginPath(); ctx.arc(-5, -85, 20, 0, Math.PI*2); ctx.fillStyle = color + 'cc'; ctx.fill(); ctx.beginPath(); ctx.arc(-5, -85, 14, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2); ctx.fillStyle = '#ffd700'; ctx.fill(); }
+            else if (type === 'oak') { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -70); ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 6; ctx.stroke(); ctx.beginPath(); ctx.arc(0, -80, 25, 0, Math.PI*2); ctx.fillStyle = 'rgba(70,100,50,0.8)'; ctx.fill(); }
+            else if (type === 'daisy') { for (let a = 0; a < Math.PI*2; a += Math.PI/5) { ctx.beginPath(); ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 8, 3, a, 0, Math.PI*2); ctx.fillStyle = '#fafaf0'; ctx.fill(); } ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2); ctx.fillStyle = '#ffd700'; ctx.fill(); }
+            else if (type === 'cactus') { ctx.fillStyle = '#4a6a4a'; ctx.fillRect(-8, -80, 16, 70); ctx.fillRect(8, -65, 14, 8); ctx.fillRect(-22, -55, 14, 8); ctx.beginPath(); ctx.arc(0, -85, 6, 0, Math.PI*2); ctx.fillStyle = '#ff69b4'; ctx.fill(); }
+            else if (type === 'vine') { for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-5, -20-i*15); ctx.quadraticCurveTo(-25, -35-i*15, -15, -50-i*15); ctx.strokeStyle = '#9a9ac0'; ctx.lineWidth = 2; ctx.stroke(); } ctx.beginPath(); ctx.arc(-10, -75, 10, 0, Math.PI*2); ctx.fillStyle = 'rgba(180,180,220,0.6)'; ctx.fill(); }
+            else if (type === 'rose') { for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(-3+i*2, -82-i*3, 8+i*2, 0, Math.PI*2); ctx.fillStyle = `rgba(192,48,64,${0.3+i*0.15})`; ctx.fill(); } ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80); ctx.strokeStyle = '#8a2030'; ctx.lineWidth = 2; ctx.stroke(); }
+            else if (type === 'lily') { for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(-5, -85, 16, 4, (i*Math.PI)/3, 0, Math.PI*2); ctx.fillStyle = 'rgba(208,216,208,0.7)'; ctx.fill(); } ctx.beginPath(); ctx.arc(-5, -85, 4, 0, Math.PI*2); ctx.fillStyle = '#f0e898'; ctx.fill(); }
+            else if (type === 'lavender' || type === 'violet') { for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(-5+(i-2)*6, -70-i*5, 5, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); } ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80); ctx.strokeStyle = '#5a5a5a'; ctx.lineWidth = 2; ctx.stroke(); }
+            else if (type === 'sunflower') { for (let a = 0; a < Math.PI*2; a += Math.PI/8) { ctx.beginPath(); ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 6, 3, a, 0, Math.PI*2); ctx.fillStyle = '#e8b030'; ctx.fill(); } ctx.beginPath(); ctx.arc(-5, -85, 8, 0, Math.PI*2); ctx.fillStyle = '#5a3a10'; ctx.fill(); }
+            else if (type === 'fern') { for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-5, -25-i*10); ctx.quadraticCurveTo(-20, -30-i*10, -25, -40-i*10); ctx.strokeStyle = '#3a6a3a'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-5, -25-i*10); ctx.quadraticCurveTo(10, -30-i*10, 15, -40-i*10); ctx.stroke(); } }
+            else if (type === 'poppy') { for (let a = 0; a < Math.PI*2; a += Math.PI/2) { ctx.beginPath(); ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*10, 10, 6, a, 0, Math.PI*2); ctx.fillStyle = 'rgba(224,64,48,0.8)'; ctx.fill(); } ctx.beginPath(); ctx.arc(-5, -85, 5, 0, Math.PI*2); ctx.fillStyle = '#1a1a1a'; ctx.fill(); }
+            else if (type === 'lotus') { for (let a = 0; a < Math.PI*2; a += Math.PI/5) { ctx.beginPath(); ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*5, 8, 4, a, 0, Math.PI*2); ctx.fillStyle = 'rgba(240,240,232,0.9)'; ctx.fill(); } }
+            else if (type === 'pine') { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80); ctx.strokeStyle = '#4a3a2a'; ctx.lineWidth = 4; ctx.stroke(); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, -40-i*12); ctx.lineTo(-15, -50-i*12); ctx.lineTo(0, -55-i*12); ctx.lineTo(15, -50-i*12); ctx.closePath(); ctx.fillStyle = '#3a5a3a'; ctx.fill(); } }
+            else if (type === 'birch') { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -75); ctx.strokeStyle = '#d0d8c0'; ctx.lineWidth = 5; ctx.stroke(); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-3, -25-i*15); ctx.lineTo(3, -25-i*15); ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1; ctx.stroke(); } ctx.beginPath(); ctx.arc(0, -80, 18, 0, Math.PI*2); ctx.fillStyle = 'rgba(200,210,180,0.6)'; ctx.fill(); }
+            else if (type === 'berry') { for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(-5+(Math.random()-0.5)*16, -60-Math.random()*25, 3, 0, Math.PI*2); ctx.fillStyle = '#6a3050'; ctx.fill(); } ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80); ctx.strokeStyle = '#4a6a3a'; ctx.lineWidth = 2; ctx.stroke(); }
+            else if (type === 'grass') { for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-3+i*3, 0); ctx.quadraticCurveTo(-5+i*3, -50, -8+i*6, -90); ctx.strokeStyle = '#c8c898'; ctx.lineWidth = 1.5; ctx.stroke(); } }
             return c.toDataURL();
         }
 
         // КУЛДАУН
         function updateCooldownButton() {
             const btn = document.getElementById('plantButton');
-            if (isAdmin) {
-                btn.textContent = '👑 Посадить';
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-                if (cooldownTimer) clearInterval(cooldownTimer);
-                cooldownTimer = null;
-                return;
-            }
-            const now = Date.now();
-            const elapsed = Math.floor((now - lastPlantTime) / 1000);
-            const remaining = PLANT_COOLDOWN - elapsed;
-            if (remaining <= 0) {
-                btn.textContent = 'Посадить 🌱';
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-                if (cooldownTimer) clearInterval(cooldownTimer);
-                cooldownTimer = null;
-            } else {
-                const min = Math.floor(remaining / 60);
-                const sec = remaining % 60;
-                btn.textContent = `⏳ ${min}:${sec.toString().padStart(2, '0')}`;
-                btn.disabled = true;
-                btn.style.opacity = '0.6';
-                btn.style.cursor = 'not-allowed';
-                if (!cooldownTimer) {
-                    cooldownTimer = setInterval(updateCooldownButton, 1000);
-                }
-            }
+            if (isAdmin) { btn.textContent = '👑 Посадить'; btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; if (cooldownTimer) clearInterval(cooldownTimer); cooldownTimer = null; return; }
+            const now = Date.now(); const elapsed = Math.floor((now - lastPlantTime) / 1000); const remaining = PLANT_COOLDOWN - elapsed;
+            if (remaining <= 0) { btn.textContent = 'Посадить 🌱'; btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; if (cooldownTimer) clearInterval(cooldownTimer); cooldownTimer = null; }
+            else { const min = Math.floor(remaining / 60); const sec = remaining % 60; btn.textContent = `⏳ ${min}:${sec.toString().padStart(2, '0')}`; btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'not-allowed'; if (!cooldownTimer) cooldownTimer = setInterval(updateCooldownButton, 1000); }
         }
 
-        // МЕНЮ РАСТЕНИЯ (МОБИЛЬНЫЕ)
         function showPlantMenu(e, plantData) {
             hideAllPlantMenus();
-            
-            const menu = document.createElement('div');
-            menu.className = 'plant-menu';
-            menu.style.cssText = `
-                position: fixed;
-                z-index: 150;
-                background: rgba(10, 20, 10, 0.95);
-                border: 1px solid rgba(100, 180, 100, 0.5);
-                border-radius: 14px;
-                padding: 8px;
-                display: flex;
-                gap: 6px;
-                pointer-events: auto;
-                backdrop-filter: blur(10px);
-                flex-wrap: wrap;
-                justify-content: center;
-            `;
-            
-            const waterLeft = isAdmin ? Infinity : MAX_WATER - plantData.watered;
+            const menu = document.createElement('div'); menu.className = 'plant-menu';
+            menu.style.cssText = `position: fixed; z-index: 150; background: rgba(10, 20, 10, 0.95); border: 1px solid rgba(100, 180, 100, 0.5); border-radius: 14px; padding: 8px; display: flex; gap: 6px; pointer-events: auto; backdrop-filter: blur(10px); flex-wrap: wrap; justify-content: center;`;
+            const myWaters = (plantData.wateredBy || []).filter(id => id === myUserId).length;
+            const waterLeft = isAdmin ? Infinity : MAX_WATER - myWaters;
             const waterBtn = document.createElement('button');
             waterBtn.textContent = `💧 Полить${(!isAdmin && waterLeft <= 0) ? ' ✓' : ''}`;
-            waterBtn.style.cssText = `
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: ${(!isAdmin && waterLeft <= 0) ? '#ff9a6c' : '#c8e6c0'};
-                padding: 10px 14px;
-                border-radius: 10px;
-                cursor: ${(!isAdmin && waterLeft <= 0) ? 'default' : 'pointer'};
-                font-family: 'Georgia', serif;
-                font-size: 13px;
-                pointer-events: auto;
-            `;
-            waterBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                if (!isAdmin && waterLeft <= 0) return;
-                waterPlant(plantData, e);
-                menu.remove();
-            });
-            
-            const fireflyLeft = isAdmin ? Infinity : MAX_FIREFLIES - plantData.fireflies;
+            waterBtn.style.cssText = `background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: ${(!isAdmin && waterLeft <= 0) ? '#ff9a6c' : '#c8e6c0'}; padding: 10px 14px; border-radius: 10px; cursor: ${(!isAdmin && waterLeft <= 0) ? 'default' : 'pointer'}; font-family: 'Georgia', serif; font-size: 13px; pointer-events: auto;`;
+            waterBtn.addEventListener('click', (ev) => { ev.stopPropagation(); if (!isAdmin && waterLeft <= 0) return; waterPlant(plantData, e); menu.remove(); });
+            const hasFirefly = (plantData.fireflyBy || []).includes(myUserId);
+            const fireflyLeft = isAdmin ? Infinity : (hasFirefly ? 0 : 1);
             const fireflyBtn = document.createElement('button');
             fireflyBtn.textContent = `✨ Светлячок${(!isAdmin && fireflyLeft <= 0) ? ' ✓' : ''}`;
-            fireflyBtn.style.cssText = `
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: ${(!isAdmin && fireflyLeft <= 0) ? '#ffd700' : '#c8e6c0'};
-                padding: 10px 14px;
-                border-radius: 10px;
-                cursor: ${(!isAdmin && fireflyLeft <= 0) ? 'default' : 'pointer'};
-                font-family: 'Georgia', serif;
-                font-size: 13px;
-                pointer-events: auto;
-            `;
-            fireflyBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                if (!isAdmin && fireflyLeft <= 0) return;
-                giftFirefly(plantData);
-                menu.remove();
-            });
-            
-            menu.appendChild(waterBtn);
-            menu.appendChild(fireflyBtn);
-            
-            if (isAdmin) {
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = '🗑️ Удалить';
-                deleteBtn.style.cssText = `
-                    background: rgba(200,50,50,0.6);
-                    border: 1px solid rgba(255,100,100,0.4);
-                    color: #ffaaaa;
-                    padding: 10px 14px;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    font-family: 'Georgia', serif;
-                    font-size: 13px;
-                    pointer-events: auto;
-                `;
-                deleteBtn.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    deletePlant(plantData);
-                    menu.remove();
-                });
-                menu.appendChild(deleteBtn);
-            }
-            
+            fireflyBtn.style.cssText = `background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: ${(!isAdmin && fireflyLeft <= 0) ? '#ffd700' : '#c8e6c0'}; padding: 10px 14px; border-radius: 10px; cursor: ${(!isAdmin && fireflyLeft <= 0) ? 'default' : 'pointer'}; font-family: 'Georgia', serif; font-size: 13px; pointer-events: auto;`;
+            fireflyBtn.addEventListener('click', (ev) => { ev.stopPropagation(); if (!isAdmin && fireflyLeft <= 0) return; giftFirefly(plantData); menu.remove(); });
+            menu.appendChild(waterBtn); menu.appendChild(fireflyBtn);
+            if (isAdmin) { const deleteBtn = document.createElement('button'); deleteBtn.textContent = '🗑️ Удалить'; deleteBtn.style.cssText = `background: rgba(200,50,50,0.6); border: 1px solid rgba(255,100,100,0.4); color: #ffaaaa; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-family: 'Georgia', serif; font-size: 13px; pointer-events: auto;`; deleteBtn.addEventListener('click', (ev) => { ev.stopPropagation(); deletePlant(plantData); menu.remove(); }); menu.appendChild(deleteBtn); }
             const rect = plantData.el.getBoundingClientRect();
             menu.style.left = Math.max(10, rect.left + rect.width/2 - 80) + 'px';
             menu.style.top = Math.max(10, rect.top - 60) + 'px';
-            
             document.body.appendChild(menu);
         }
-
-        function hideAllPlantMenus() {
-            document.querySelectorAll('.plant-menu').forEach(m => m.remove());
-        }
+        function hideAllPlantMenus() { document.querySelectorAll('.plant-menu').forEach(m => m.remove()); }
 
         function setupPlantInteractions(plantData) {
-            const wrapper = plantData.el;
-            
-            wrapper.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (e.target.closest('.delete-btn')) return;
-                if (e.target.closest('.plant-menu')) return;
-                if (isMobile) return;
-                handlePlantInteraction(plantData, e);
-            });
-            
-            wrapper.addEventListener('touchend', (e) => {
-                if (e.target.closest('.delete-btn')) return;
-                if (e.target.closest('.plant-menu')) return;
-                e.stopPropagation();
-                e.preventDefault();
-                if (isMobile) {
-                    showPlantMenu(e, plantData);
-                }
-            });
-            
-            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
-            wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
-            wrapper.addEventListener('mouseleave', () => hideTooltip());
-            
-            let longPressTimer = null;
-            wrapper.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.delete-btn')) return;
-                if (e.target.closest('.plant-menu')) return;
-                longPressTimer = setTimeout(() => {
-                    showTooltip(e, plantData);
-                    setTimeout(() => hideTooltip(), 2000);
-                }, 600);
-            });
-            wrapper.addEventListener('touchmove', () => {
-                clearTimeout(longPressTimer);
-                hideTooltip();
-            });
-            wrapper.addEventListener('touchend', () => {
-                clearTimeout(longPressTimer);
-            });
+            const wrapper = plantData.el; let lastTap = 0; let tapTimeout = null;
+            wrapper.addEventListener('click', (e) => { e.stopPropagation(); if (e.target.closest('.delete-btn')) return; if (e.target.closest('.plant-menu')) return; if (isMobile) return; handlePlantInteraction(plantData, e); });
+            wrapper.addEventListener('touchend', (e) => { if (e.target.closest('.delete-btn')) return; if (e.target.closest('.plant-menu')) return; e.stopPropagation(); e.preventDefault(); if (!isMobile) return; const now = Date.now(); const timeSinceLastTap = now - lastTap; lastTap = now; if (timeSinceLastTap < 500 && timeSinceLastTap > 50) { clearTimeout(tapTimeout); tapTimeout = null; lastTap = 0; showTooltip(e, plantData); setTimeout(() => hideTooltip(), 3000); } else { clearTimeout(tapTimeout); tapTimeout = setTimeout(() => { showPlantMenu(e, plantData); tapTimeout = null; }, 500); } });
+            wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData)); wrapper.addEventListener('mousemove', (e) => positionTooltip(e)); wrapper.addEventListener('mouseleave', () => hideTooltip());
         }
+        function handlePlantInteraction(plantData, e) { if (clickTimers.has(plantData)) { clearTimeout(clickTimers.get(plantData)); clickTimers.delete(plantData); giftFirefly(plantData); } else { clickTimers.set(plantData, setTimeout(() => { clickTimers.delete(plantData); waterPlant(plantData, e); }, 300)); } }
 
-        function handlePlantInteraction(plantData, e) {
-            if (clickTimers.has(plantData)) {
-                clearTimeout(clickTimers.get(plantData));
-                clickTimers.delete(plantData);
-                giftFirefly(plantData);
-            } else {
-                clickTimers.set(plantData, setTimeout(() => {
-                    clickTimers.delete(plantData);
-                    waterPlant(plantData, e);
-                }, 300));
-            }
-        }
-
-        // ПОСАДИТЬ
         function plantSeed() {
-            if (!isAdmin) {
-                const now = Date.now();
-                const elapsed = Math.floor((now - lastPlantTime) / 1000);
-                if (elapsed < PLANT_COOLDOWN) {
-                    const remaining = PLANT_COOLDOWN - elapsed;
-                    const min = Math.floor(remaining / 60);
-                    const sec = remaining % 60;
-                    showNotification(`⏳ Подожди ${min}:${sec.toString().padStart(2, '0')}`, 2000);
-                    return;
-                }
-            }
-            const input = document.getElementById('textInput');
-            const text = input.value.trim();
-            if (!isValidMessage(text)) {
-                input.style.border = '1px solid #ff4444';
-                showNotification('🌱 Напиши что-то осмысленное...');
-                setTimeout(() => input.style.border = '', 1000);
-                return;
-            }
-            const plant = getPlantByText(text);
-            const imgSrc = drawPlant(plant.type, plant.color);
-            let px, py;
-            if (allPlants.length > 0) {
-                const near = allPlants[Math.floor(Math.random() * allPlants.length)];
-                const pos = findValidPosition(near);
-                px = pos.x; py = pos.y;
-            } else {
-                px = MAP_WIDTH / 2; py = MAP_HEIGHT * 0.3;
-            }
-            const wrapper = document.createElement('div');
-            wrapper.className = 'plant-wrapper';
-            wrapper.style.left = px + 'px';
-            wrapper.style.top = py + 'px';
-            wrapper.style.width = '70px';
-            wrapper.style.height = '120px';
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.className = 'plant-img';
-            img.style.width = '70px';
-            img.style.height = '100px';
-            wrapper.appendChild(img);
-            const plantData = {
-                x: px, y: py, el: wrapper, text: text,
-                name: plant.name, emoji: plant.emoji, type: plant.type,
-                watered: 0, fireflies: 0, giftedFireflies: [], plantedAt: Date.now(),
-                firebaseId: null
-            };
-            setupPlantInteractions(plantData);
-            meadowLayer.appendChild(wrapper);
-            allPlants.push(plantData);
-            plantCount++;
+            if (!isAdmin) { const now = Date.now(); const elapsed = Math.floor((now - lastPlantTime) / 1000); if (elapsed < PLANT_COOLDOWN) { const remaining = PLANT_COOLDOWN - elapsed; const min = Math.floor(remaining / 60); const sec = remaining % 60; showNotification(`⏳ Подожди ${min}:${sec.toString().padStart(2, '0')}`, 2000); return; } }
+            const input = document.getElementById('textInput'); const text = input.value.trim();
+            if (!isValidMessage(text)) { input.style.border = '1px solid #ff4444'; showNotification('🌱 Напиши что-то осмысленное...'); setTimeout(() => input.style.border = '', 1000); return; }
+            const plant = getPlantByText(text); const imgSrc = drawPlant(plant.type, plant.color);
+            let px, py; if (allPlants.length > 0) { const near = allPlants[Math.floor(Math.random() * allPlants.length)]; const pos = findValidPosition(near); px = pos.x; py = pos.y; } else { px = MAP_WIDTH / 2; py = MAP_HEIGHT * 0.3; }
+            const wrapper = document.createElement('div'); wrapper.className = 'plant-wrapper'; wrapper.style.left = px + 'px'; wrapper.style.top = py + 'px'; wrapper.style.width = '70px'; wrapper.style.height = '120px';
+            const img = document.createElement('img'); img.src = imgSrc; img.className = 'plant-img'; img.style.width = '70px'; img.style.height = '100px'; wrapper.appendChild(img);
+            const plantData = { x: px, y: py, el: wrapper, text: text, name: plant.name, emoji: plant.emoji, type: plant.type, wateredBy: [], fireflyBy: [], giftedFireflies: [], plantedAt: Date.now(), firebaseId: null };
+            setupPlantInteractions(plantData); meadowLayer.appendChild(wrapper); allPlants.push(plantData); plantCount++;
             document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
-            savePlantToFirebase(plantData);
-            if (isAdmin) addDeleteButton(plantData);
-            centerOnPlant(px, py);
-            if (!isAdmin) lastPlantTime = Date.now();
-            updateCooldownButton();
-            input.value = '';
-            input.placeholder = isAdmin ? '👑 Админ-посадка...' : 'Растение посажено...';
-            setTimeout(() => input.placeholder = 'Напиши то, что не отправил...', 2000);
+            savePlantToFirebase(plantData); if (isAdmin) addDeleteButton(plantData);
+            centerOnPlant(px, py); if (!isAdmin) lastPlantTime = Date.now(); updateCooldownButton();
+            input.value = ''; input.placeholder = isAdmin ? '👑 Админ-посадка...' : 'Растение посажено...'; setTimeout(() => input.placeholder = 'Напиши то, что не отправил...', 2000);
         }
 
         document.getElementById('plantButton').addEventListener('click', plantSeed);
-        document.getElementById('textInput').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') plantSeed();
-        });
+        document.getElementById('textInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') plantSeed(); });
         document.getElementById('btnTop3').addEventListener('click', showTop3);
         document.getElementById('btnFindGarden').addEventListener('click', findGarden);
 
-        // ЗАПУСК
-        function init() {
-            setupOnlineStatus();
-            setupPlantsSync();
-            updateAdminButtonText();
-            updateCooldownButton();
-            setTimeout(() => {
-                const legend = document.getElementById('legend');
-                legend.classList.add('visible');
-                setTimeout(() => legend.classList.remove('visible'), 6000);
-            }, 1000);
-        }
+        function init() { setupOnlineStatus(); setupPlantsSync(); updateAdminButtonText(); updateCooldownButton(); setTimeout(() => { const legend = document.getElementById('legend'); legend.classList.add('visible'); setTimeout(() => legend.classList.remove('visible'), 6000); }, 1000); }
         init();
     </script>
 </body>
