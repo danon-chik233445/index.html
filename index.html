@@ -433,7 +433,7 @@
         <button class="top-btn admin-btn" id="adminToggleBtn">🔑 Админ</button>
     </div>
     <div class="legend" id="legend">
-        💧 тап — полить (макс. 3) &nbsp;|&nbsp; ✨ двойной тап — светлячок (макс. 1) &nbsp;|&nbsp; наведи — прочитать
+        💧 тап — меню &nbsp;|&nbsp; 📱 долгий тап — прочитать
     </div>
     <div class="notification" id="notification"></div>
     <div class="admin-notification" id="adminNotification">👑 Администратор на сервере</div>
@@ -873,11 +873,12 @@
             const cy = e.touches ? e.touches[0].clientY : e.clientY;
             if (e.target.closest('.plant-wrapper') || e.target.closest('.top-panel') || 
                 e.target.closest('.input-panel') || e.target.closest('.delete-btn') || 
-                e.target.closest('.admin-login-menu')) return;
+                e.target.closest('.admin-login-menu') || e.target.closest('.plant-menu')) return;
             isDragging = true; startDragX = cx; startDragY = cy;
             startMapX = mapX; startMapY = mapY;
             viewport.classList.add('grabbing');
             hideTooltip();
+            hideAllPlantMenus();
         }
         function onDragMove(e) {
             if (!isDragging) return;
@@ -898,6 +899,18 @@
         window.addEventListener('touchmove', onDragMove, {passive: false});
         window.addEventListener('touchend', onDragEnd);
         document.addEventListener('gesturestart', e => e.preventDefault());
+
+        // Закрытие меню по клику в любом месте
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) {
+                hideAllPlantMenus();
+            }
+        });
+        document.addEventListener('touchend', (e) => {
+            if (!e.target.closest('.plant-menu') && !e.target.closest('.plant-wrapper')) {
+                setTimeout(hideAllPlantMenus, 100);
+            }
+        });
 
         // УВЕДОМЛЕНИЯ
         function showNotification(t, d = 2000) {
@@ -958,7 +971,7 @@
                 </div>
                 ${w}
                 ${isAdmin ? '<div style="font-size:11px;color:#ff9a9a;margin-top:6px;">👑 Админ: без ограничений</div>' : ''}
-                <div style="font-size:11px;color:#5a7a5a;margin-top:6px;">💧 тап — полить &nbsp;|&nbsp; ✨ двойной тап — светлячок</div>`;
+                <div style="font-size:11px;color:#5a7a5a;margin-top:6px;">💧 тап — меню &nbsp;|&nbsp; 📱 долгий тап — прочитать</div>`;
             document.body.appendChild(tip);
             positionTooltip(e);
             activeTooltip = tip;
@@ -1343,38 +1356,123 @@
             }
         }
 
+        // МЕНЮ РАСТЕНИЯ (МОБИЛЬНЫЕ)
+        function showPlantMenu(e, plantData) {
+            hideAllPlantMenus();
+            
+            const menu = document.createElement('div');
+            menu.className = 'plant-menu';
+            menu.style.cssText = `
+                position: fixed;
+                z-index: 150;
+                background: rgba(10, 20, 10, 0.95);
+                border: 1px solid rgba(100, 180, 100, 0.5);
+                border-radius: 14px;
+                padding: 8px;
+                display: flex;
+                gap: 6px;
+                pointer-events: auto;
+                backdrop-filter: blur(10px);
+                flex-wrap: wrap;
+                justify-content: center;
+            `;
+            
+            const waterLeft = isAdmin ? Infinity : MAX_WATER - plantData.watered;
+            const waterBtn = document.createElement('button');
+            waterBtn.textContent = `💧 Полить${(!isAdmin && waterLeft <= 0) ? ' ✓' : ''}`;
+            waterBtn.style.cssText = `
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: ${(!isAdmin && waterLeft <= 0) ? '#ff9a6c' : '#c8e6c0'};
+                padding: 10px 14px;
+                border-radius: 10px;
+                cursor: ${(!isAdmin && waterLeft <= 0) ? 'default' : 'pointer'};
+                font-family: 'Georgia', serif;
+                font-size: 13px;
+                pointer-events: auto;
+            `;
+            waterBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (!isAdmin && waterLeft <= 0) return;
+                waterPlant(plantData, e);
+                menu.remove();
+            });
+            
+            const fireflyLeft = isAdmin ? Infinity : MAX_FIREFLIES - plantData.fireflies;
+            const fireflyBtn = document.createElement('button');
+            fireflyBtn.textContent = `✨ Светлячок${(!isAdmin && fireflyLeft <= 0) ? ' ✓' : ''}`;
+            fireflyBtn.style.cssText = `
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: ${(!isAdmin && fireflyLeft <= 0) ? '#ffd700' : '#c8e6c0'};
+                padding: 10px 14px;
+                border-radius: 10px;
+                cursor: ${(!isAdmin && fireflyLeft <= 0) ? 'default' : 'pointer'};
+                font-family: 'Georgia', serif;
+                font-size: 13px;
+                pointer-events: auto;
+            `;
+            fireflyBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (!isAdmin && fireflyLeft <= 0) return;
+                giftFirefly(plantData);
+                menu.remove();
+            });
+            
+            menu.appendChild(waterBtn);
+            menu.appendChild(fireflyBtn);
+            
+            if (isAdmin) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '🗑️ Удалить';
+                deleteBtn.style.cssText = `
+                    background: rgba(200,50,50,0.6);
+                    border: 1px solid rgba(255,100,100,0.4);
+                    color: #ffaaaa;
+                    padding: 10px 14px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-family: 'Georgia', serif;
+                    font-size: 13px;
+                    pointer-events: auto;
+                `;
+                deleteBtn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    deletePlant(plantData);
+                    menu.remove();
+                });
+                menu.appendChild(deleteBtn);
+            }
+            
+            const rect = plantData.el.getBoundingClientRect();
+            menu.style.left = Math.max(10, rect.left + rect.width/2 - 80) + 'px';
+            menu.style.top = Math.max(10, rect.top - 60) + 'px';
+            
+            document.body.appendChild(menu);
+        }
+
+        function hideAllPlantMenus() {
+            document.querySelectorAll('.plant-menu').forEach(m => m.remove());
+        }
+
         function setupPlantInteractions(plantData) {
             const wrapper = plantData.el;
-            let lastTap = 0;
-            let tapTimeout = null;
             
             wrapper.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (e.target.closest('.delete-btn')) return;
+                if (e.target.closest('.plant-menu')) return;
+                if (isMobile) return;
                 handlePlantInteraction(plantData, e);
             });
             
             wrapper.addEventListener('touchend', (e) => {
                 if (e.target.closest('.delete-btn')) return;
+                if (e.target.closest('.plant-menu')) return;
                 e.stopPropagation();
                 e.preventDefault();
-                
-                const now = Date.now();
-                const timeSinceLastTap = now - lastTap;
-                
-                if (timeSinceLastTap < 400 && timeSinceLastTap > 50) {
-                    clearTimeout(tapTimeout);
-                    tapTimeout = null;
-                    lastTap = 0;
-                    giftFirefly(plantData);
-                } else {
-                    lastTap = now;
-                    clearTimeout(tapTimeout);
-                    tapTimeout = setTimeout(() => {
-                        waterPlant(plantData, e);
-                        lastTap = 0;
-                        tapTimeout = null;
-                    }, 400);
+                if (isMobile) {
+                    showPlantMenu(e, plantData);
                 }
             });
             
@@ -1385,10 +1483,11 @@
             let longPressTimer = null;
             wrapper.addEventListener('touchstart', (e) => {
                 if (e.target.closest('.delete-btn')) return;
+                if (e.target.closest('.plant-menu')) return;
                 longPressTimer = setTimeout(() => {
                     showTooltip(e, plantData);
                     setTimeout(() => hideTooltip(), 2000);
-                }, 500);
+                }, 600);
             });
             wrapper.addEventListener('touchmove', () => {
                 clearTimeout(longPressTimer);
