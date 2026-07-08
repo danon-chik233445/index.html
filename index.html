@@ -6,7 +6,6 @@
     <title>Сад Запоздалых Слов</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Georgia', serif;
             background: #0d1117;
@@ -17,26 +16,19 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
         }
-        
         .sky {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
             z-index: 0;
         }
-        
         .moon {
             position: absolute;
-            top: 8%;
-            right: 15%;
-            width: 80px;
-            height: 80px;
+            top: 8%; right: 15%;
+            width: 80px; height: 80px;
             background: radial-gradient(circle at 30% 30%, #f5f0d0 0%, #e8e0b0 30%, #c8c0a0 60%, #a09878 100%);
-            border-radius: 50%;
-            z-index: 1;
-            box-shadow: 0 0 40px 15px rgba(255, 250, 220, 0.15),
-                        0 0 80px 30px rgba(255, 240, 200, 0.08),
-                        0 0 120px 50px rgba(200, 180, 140, 0.05);
+            border-radius: 50%; z-index: 1;
+            box-shadow: 0 0 40px 15px rgba(255, 250, 220, 0.15), 0 0 80px 30px rgba(255, 240, 200, 0.08), 0 0 120px 50px rgba(200, 180, 140, 0.05);
             animation: moonGlow 4s ease-in-out infinite;
         }
         .moon::before {
@@ -46,36 +38,27 @@
             width: 15px; height: 15px;
             background: rgba(200, 190, 150, 0.4);
             border-radius: 50%;
-            box-shadow: 
-                25px 15px 0 5px rgba(180, 170, 130, 0.3),
-                10px 35px 0 3px rgba(180, 170, 130, 0.25),
-                40px 30px 0 4px rgba(160, 150, 110, 0.2);
+            box-shadow: 25px 15px 0 5px rgba(180, 170, 130, 0.3), 10px 35px 0 3px rgba(180, 170, 130, 0.25), 40px 30px 0 4px rgba(160, 150, 110, 0.2);
         }
         @keyframes moonGlow {
             0%, 100% { box-shadow: 0 0 40px 15px rgba(255, 250, 220, 0.15), 0 0 80px 30px rgba(255, 240, 200, 0.08); }
             50% { box-shadow: 0 0 50px 20px rgba(255, 250, 220, 0.2), 0 0 100px 40px rgba(255, 240, 200, 0.12); }
         }
-        
         .comet {
-            position: absolute;
-            z-index: 2;
-            pointer-events: none;
+            position: absolute; z-index: 2; pointer-events: none;
             animation: cometFly 3s ease-in forwards;
         }
         .comet-head {
             width: 6px; height: 6px;
-            background: #ffffff;
-            border-radius: 50%;
-            box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.9),
-                        0 0 30px 10px rgba(200, 220, 255, 0.6);
+            background: #ffffff; border-radius: 50%;
+            box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.9), 0 0 30px 10px rgba(200, 220, 255, 0.6);
         }
         .comet-tail {
             position: absolute;
             top: 2px; right: 5px;
             width: 80px; height: 2px;
             background: linear-gradient(to left, rgba(255,255,255,0.9), rgba(180,200,255,0.5), rgba(100,150,255,0.1), transparent);
-            border-radius: 50%;
-            transform-origin: right center;
+            border-radius: 50%; transform-origin: right center;
         }
         @keyframes cometFly {
             0% { transform: translate(0, 0) rotate(-35deg); opacity: 0; }
@@ -83,60 +66,38 @@
             80% { opacity: 0.6; }
             100% { transform: translate(-600px, 400px) rotate(-35deg); opacity: 0; }
         }
-        
         .star {
             position: absolute;
-            background: white;
-            border-radius: 50%;
+            background: white; border-radius: 50%;
             animation: twinkle 3s infinite alternate;
         }
         @keyframes twinkle {
             0% { opacity: 0.3; }
             100% { opacity: 1; }
         }
-        
         .earth-layer {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            height: 32%;
-            z-index: 0;
-            background: linear-gradient(180deg, 
-                #1a2f1a 0%,
-                #1a2818 8%,
-                #2d1f0e 20%,
-                #3d2b14 35%,
-                #2d1f0e 55%,
-                #1a1208 75%,
-                #0d0a05 100%);
+            height: 32%; z-index: 0;
+            background: linear-gradient(180deg, #1a2f1a 0%, #1a2818 8%, #2d1f0e 20%, #3d2b14 35%, #2d1f0e 55%, #1a1208 75%, #0d0a05 100%);
             overflow: hidden;
         }
         .earth-texture {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             opacity: 0.15;
-            background: 
-                radial-gradient(circle at 20% 30%, #5a3a1a 1px, transparent 1px),
-                radial-gradient(circle at 50% 60%, #4a2a10 2px, transparent 2px),
-                radial-gradient(circle at 70% 20%, #3a1a08 1px, transparent 1px),
-                radial-gradient(circle at 30% 70%, #5a3a1a 1px, transparent 1px),
-                radial-gradient(circle at 80% 50%, #4a2a10 2px, transparent 2px);
+            background: radial-gradient(circle at 20% 30%, #5a3a1a 1px, transparent 1px), radial-gradient(circle at 50% 60%, #4a2a10 2px, transparent 2px), radial-gradient(circle at 70% 20%, #3a1a08 1px, transparent 1px), radial-gradient(circle at 30% 70%, #5a3a1a 1px, transparent 1px), radial-gradient(circle at 80% 50%, #4a2a10 2px, transparent 2px);
             background-size: 80px 80px, 120px 120px, 100px 100px, 90px 90px, 110px 110px;
         }
         .earth-roots {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             opacity: 0.12;
-            background:
-                linear-gradient(30deg, transparent 40%, #3a2010 41%, transparent 42%) 0 0 / 200px 30px,
-                linear-gradient(-20deg, transparent 40%, #2a1808 41%, transparent 42%) 50px 15px / 180px 25px,
-                linear-gradient(45deg, transparent 35%, #3a2010 36%, transparent 37%) 30px 20px / 220px 20px;
+            background: linear-gradient(30deg, transparent 40%, #3a2010 41%, transparent 42%) 0 0 / 200px 30px, linear-gradient(-20deg, transparent 40%, #2a1808 41%, transparent 42%) 50px 15px / 180px 25px, linear-gradient(45deg, transparent 35%, #3a2010 36%, transparent 37%) 30px 20px / 220px 20px;
         }
-        
         .lost-plant {
-            position: absolute;
-            z-index: 1;
-            opacity: 0.35;
-            pointer-events: none;
+            position: absolute; z-index: 1;
+            opacity: 0.35; pointer-events: none;
             animation: lostSway 6s ease-in-out infinite;
             filter: brightness(0.4) saturate(0.3);
         }
@@ -144,18 +105,14 @@
             0%, 100% { transform: rotate(-2deg); }
             50% { transform: rotate(2deg); }
         }
-        
         .viewport {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            height: 65%;
-            overflow: hidden;
-            z-index: 1;
-            cursor: grab;
+            height: 65%; overflow: hidden;
+            z-index: 1; cursor: grab;
         }
         .viewport:active { cursor: grabbing; }
         .viewport.grabbing { cursor: grabbing; }
-        
         .meadow-layer {
             position: absolute;
             transform-origin: 0 0;
@@ -163,14 +120,11 @@
         }
         .meadow-bg {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(ellipse at 50% 30%, #1e351e 0%, #1a2f1a 20%, #0f290f 50%, #0a1f0a 80%, #061506 100%);
         }
-        
         .plant-wrapper {
-            position: absolute;
-            z-index: 2;
+            position: absolute; z-index: 2;
             animation: grow 1.5s ease-out forwards;
             cursor: pointer;
         }
@@ -179,37 +133,25 @@
             transform: scale(1.15);
             filter: brightness(1.4) drop-shadow(0 0 10px rgba(255,215,0,0.5));
         }
-        .plant-wrapper:active .plant-img {
-            transform: scale(1.15);
-            filter: brightness(1.4) drop-shadow(0 0 10px rgba(255,215,0,0.5));
-        }
         .plant-img { transition: transform 0.3s, filter 0.3s; }
-        
         @keyframes grow {
             0% { transform: scale(0); opacity: 0; }
             60% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        
         .plant-indicators {
             position: absolute;
             bottom: -18px; left: 50%;
             transform: translateX(-50%);
             display: flex; gap: 3px;
-            font-size: 9px;
-            pointer-events: none;
+            font-size: 9px; pointer-events: none;
             background: rgba(0,0,0,0.5);
-            padding: 1px 5px;
-            border-radius: 8px;
-            white-space: nowrap;
+            padding: 1px 5px; border-radius: 8px; white-space: nowrap;
         }
-        
         .firefly {
             position: absolute;
             width: 4px; height: 4px;
-            background: #ffd700;
-            border-radius: 50%;
-            z-index: 3;
+            background: #ffd700; border-radius: 50%; z-index: 3;
             box-shadow: 0 0 8px 3px rgba(255, 215, 0, 0.5);
             animation: fly 8s infinite ease-in-out;
         }
@@ -219,13 +161,10 @@
             50% { transform: translate(-20px, -100px); opacity: 0.4; }
             75% { transform: translate(40px, -60px); opacity: 0.8; }
         }
-        
         .gifted-firefly {
             position: absolute;
             width: 5px; height: 5px;
-            background: #ffd700;
-            border-radius: 50%;
-            z-index: 4;
+            background: #ffd700; border-radius: 50%; z-index: 4;
             box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7);
             animation: giftedFly 6s infinite ease-in-out;
             pointer-events: none;
@@ -236,13 +175,10 @@
             50% { transform: translate(-10px, -55px) scale(0.9); opacity: 0.7; }
             75% { transform: translate(20px, -35px) scale(1.2); opacity: 0.9; }
         }
-        
         .water-drop {
             position: absolute;
             width: 3px; height: 6px;
-            background: #7ec8e3;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            z-index: 5;
+            background: #7ec8e3; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; z-index: 5;
             pointer-events: none;
             animation: dropFall 0.8s ease-in forwards;
         }
@@ -250,118 +186,77 @@
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(40px); opacity: 0; }
         }
-        
         .input-panel {
             position: fixed;
-            bottom: 30px; left: 50%;
-            transform: translateX(-50%);
+            bottom: 30px; left: 50%; transform: translateX(-50%);
             z-index: 10;
             display: flex; gap: 10px;
             background: rgba(10, 20, 10, 0.85);
             backdrop-filter: blur(20px);
-            padding: 12px 20px;
-            border-radius: 50px;
+            padding: 12px 20px; border-radius: 50px;
             border: 1px solid rgba(100, 180, 100, 0.3);
         }
         .input-panel input {
-            background: transparent;
-            border: none;
-            color: #c8e6c0;
-            font-size: 16px;
-            width: 320px;
-            outline: none;
-            font-family: 'Georgia', serif;
+            background: transparent; border: none;
+            color: #c8e6c0; font-size: 16px; width: 320px;
+            outline: none; font-family: 'Georgia', serif;
         }
         .input-panel input::placeholder { color: #4a6a4a; }
         .input-panel button {
             background: linear-gradient(135deg, #3a6a3a, #5a9a5a);
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 50px;
+            color: #fff; border: none;
+            padding: 10px 24px; border-radius: 50px;
             cursor: pointer;
-            font-family: 'Georgia', serif;
-            font-size: 14px;
-            transition: all 0.3s;
-            white-space: nowrap;
+            font-family: 'Georgia', serif; font-size: 14px;
+            transition: all 0.3s; white-space: nowrap;
             min-width: 130px;
         }
         .input-panel button:hover:not(:disabled) {
             background: linear-gradient(135deg, #5a9a5a, #7aba7a);
             box-shadow: 0 0 20px rgba(100, 180, 100, 0.4);
         }
-        .input-panel button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
+        .input-panel button:disabled { opacity: 0.6; cursor: not-allowed; }
         .hint {
             position: fixed;
-            top: 30px; left: 50%;
-            transform: translateX(-50%);
+            top: 30px; left: 50%; transform: translateX(-50%);
             z-index: 10;
-            color: #7a9a7a;
-            font-size: 14px;
-            letter-spacing: 2px;
-            opacity: 0.7;
-            pointer-events: none;
+            color: #7a9a7a; font-size: 14px; letter-spacing: 2px;
+            opacity: 0.7; pointer-events: none;
         }
-        
         .counter {
             position: fixed;
-            top: 30px; right: 30px;
-            z-index: 10;
-            color: #5a8a5a;
-            font-size: 13px;
-            opacity: 0.7;
-            pointer-events: none;
+            top: 30px; right: 30px; z-index: 10;
+            color: #5a8a5a; font-size: 13px; opacity: 0.7; pointer-events: none;
         }
-
-        /* Индикатор онлайна */
         .online-indicator {
             position: fixed;
-            top: 50px;
-            right: 30px;
-            z-index: 10;
-            color: #5a8a5a;
-            font-size: 11px;
-            opacity: 0.7;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            top: 50px; right: 30px; z-index: 10;
+            color: #5a8a5a; font-size: 11px; opacity: 0.7; pointer-events: none;
+            display: flex; align-items: center; gap: 5px;
         }
         .online-dot {
-            width: 8px;
-            height: 8px;
-            background: #4f8;
-            border-radius: 50%;
+            width: 8px; height: 8px;
+            background: #4f8; border-radius: 50%;
             animation: onlinePulse 2s infinite;
         }
         @keyframes onlinePulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
-
         .top-panel {
             position: fixed;
-            top: 70px; right: 20px;
-            z-index: 10;
+            top: 70px; right: 20px; z-index: 10;
             display: flex; flex-direction: column; gap: 6px;
         }
-        
         .top-btn {
             background: rgba(10, 20, 10, 0.75);
             border: 1px solid rgba(100, 180, 100, 0.3);
             color: #8aba8a;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 8px 16px; border-radius: 20px;
             cursor: pointer;
-            font-family: 'Georgia', serif;
-            font-size: 12px;
+            font-family: 'Georgia', serif; font-size: 12px;
             transition: all 0.3s;
-            text-align: left;
-            backdrop-filter: blur(10px);
+            text-align: left; backdrop-filter: blur(10px);
             width: 100%;
         }
         .top-btn:hover {
@@ -369,148 +264,94 @@
             color: #c8e6c0;
             border-color: rgba(180, 220, 180, 0.6);
         }
-        
         .admin-btn {
             background: rgba(80, 20, 20, 0.75) !important;
             border-color: rgba(255, 100, 100, 0.4) !important;
             color: #ff9a9a !important;
-            font-size: 10px !important;
-            margin-top: 10px;
+            font-size: 10px !important; margin-top: 10px;
         }
-        .admin-btn:hover {
-            background: rgba(120, 30, 30, 0.9) !important;
-            color: #ffcccc !important;
-        }
+        .admin-btn:hover { background: rgba(120, 30, 30, 0.9) !important; color: #ffcccc !important; }
         .admin-active {
             background: rgba(120, 40, 40, 0.9) !important;
             border-color: rgba(255, 150, 150, 0.7) !important;
             color: #ffaaaa !important;
             box-shadow: 0 0 15px rgba(255, 100, 100, 0.3);
         }
-        
-        .admin-login-menu {
-            animation: fadeIn 0.2s ease;
-        }
+        .admin-login-menu { animation: fadeIn 0.2s ease; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        
         .delete-btn {
             position: absolute;
-            top: -15px;
-            right: -10px;
-            width: 28px;
-            height: 28px;
+            top: -15px; right: -10px;
+            width: 28px; height: 28px;
             background: rgba(200, 40, 40, 0.8);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            z-index: 30;
-            display: none;
-            pointer-events: auto;
-            line-height: 28px;
-            text-align: center;
+            color: #fff; border: none; border-radius: 50%;
+            cursor: pointer; font-size: 16px; z-index: 30;
+            display: none; pointer-events: auto;
+            line-height: 28px; text-align: center;
         }
-        .delete-btn:hover {
-            background: rgba(255, 50, 50, 0.9);
-            transform: scale(1.2);
-        }
-        .delete-btn.visible {
-            display: block;
-        }
-        
+        .delete-btn:hover { background: rgba(255, 50, 50, 0.9); transform: scale(1.2); }
+        .delete-btn.visible { display: block; }
         .tooltip {
             position: fixed;
             background: rgba(0,0,0,0.92);
             color: #c8e6c0;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 100;
+            padding: 12px 16px; border-radius: 12px;
+            font-size: 13px; pointer-events: none; z-index: 100;
             border: 1px solid rgba(100,180,100,0.3);
-            max-width: 280px;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            line-height: 1.5;
+            max-width: 280px; word-wrap: break-word;
+            white-space: pre-wrap; line-height: 1.5;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .tooltip .tooltip-actions {
-            margin-top: 8px;
-            font-size: 11px;
-            color: #7a9a7a;
-            display: flex; gap: 12px;
+            margin-top: 8px; font-size: 11px;
+            color: #7a9a7a; display: flex; gap: 12px;
         }
         .tooltip .water-limit-warning {
-            color: #ff9a6c;
-            font-size: 10px;
-            margin-top: 4px;
-            font-style: italic;
+            color: #ff9a6c; font-size: 10px; margin-top: 4px; font-style: italic;
         }
-        
         .legend {
             position: fixed;
-            bottom: 100px; left: 50%;
-            transform: translateX(-50%);
+            bottom: 100px; left: 50%; transform: translateX(-50%);
             z-index: 10;
-            color: #5a7a5a;
-            font-size: 11px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            pointer-events: none;
-            text-align: center;
+            color: #5a7a5a; font-size: 11px;
+            opacity: 0; transition: opacity 0.5s;
+            pointer-events: none; text-align: center;
         }
         .legend.visible { opacity: 0.8; }
-        
         .notification {
             position: fixed;
-            top: 60px; left: 50%;
-            transform: translateX(-50%);
+            top: 60px; left: 50%; transform: translateX(-50%);
             z-index: 200;
             background: rgba(0,0,0,0.85);
             color: #ffd700;
-            padding: 10px 22px;
-            border-radius: 25px;
-            font-size: 14px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
+            padding: 10px 22px; border-radius: 25px;
+            font-size: 14px; pointer-events: none;
+            opacity: 0; transition: opacity 0.5s;
             border: 1px solid rgba(255,215,0,0.4);
             text-shadow: 0 0 10px rgba(255,215,0,0.5);
             letter-spacing: 1px;
         }
         .notification.show { opacity: 1; }
-        
         .admin-notification {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 300;
             background: rgba(20, 0, 0, 0.95);
             color: #ff6b6b;
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 16px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
+            padding: 20px 30px; border-radius: 15px;
+            font-size: 16px; pointer-events: none;
+            opacity: 0; transition: opacity 0.5s;
             border: 2px solid rgba(255, 100, 100, 0.5);
-            text-align: center;
-            letter-spacing: 1px;
+            text-align: center; letter-spacing: 1px;
         }
         .admin-notification.show { opacity: 1; }
-        
         .top-badge {
             position: absolute;
-            top: -25px; left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            pointer-events: none;
-            z-index: 10;
+            top: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 18px; pointer-events: none; z-index: 10;
             animation: badgeFloat 2s ease-in-out infinite;
             text-shadow: 0 0 10px rgba(255,215,0,0.8);
         }
@@ -518,7 +359,6 @@
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-5px); }
         }
-        
         .plant-wrapper.highlight .plant-img {
             animation: pulse 0.8s ease-in-out 3;
             filter: brightness(1.8) drop-shadow(0 0 20px rgba(255,215,0,0.8)) !important;
@@ -527,7 +367,6 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.3); }
         }
-
         @media (max-width: 768px) {
             .viewport { height: 60%; }
             .earth-layer { height: 40%; }
@@ -543,10 +382,8 @@
             .legend { bottom: 80px; font-size: 9px; }
             .notification { top: 45px; font-size: 12px; padding: 8px 16px; }
             .moon { width: 50px; height: 50px; top: 10%; right: 10%; }
-            .plant-wrapper:hover .plant-img { transform: scale(1.08); }
             .delete-btn { width: 32px; height: 32px; font-size: 18px; line-height: 32px; top: -18px; right: -12px; }
         }
-
         @media (max-width: 480px) {
             .input-panel { bottom: 15px; padding: 6px 10px; gap: 4px; border-radius: 30px; }
             .input-panel input { width: 130px; font-size: 12px; }
@@ -563,60 +400,53 @@
     <div class="sky" id="sky">
         <div class="moon"></div>
     </div>
-    
     <div class="earth-layer" id="earthLayer">
         <div class="earth-texture"></div>
         <div class="earth-roots"></div>
     </div>
-    
     <div class="viewport" id="viewport">
         <div class="meadow-layer" id="meadowLayer">
             <div class="meadow-bg" id="meadowBg"></div>
         </div>
     </div>
-    
     <div class="hint">🌿 САД ЗАПОЗДАЛЫХ СЛОВ 🌿</div>
     <div class="counter" id="counter">Растений в саду: 0</div>
     <div class="online-indicator" id="onlineIndicator">
         <div class="online-dot"></div>
         <span id="onlineCount">0 онлайн</span>
     </div>
-    
     <div class="top-panel" id="topPanel">
         <button class="top-btn" id="btnTop3">🏆 Топ-3</button>
         <button class="top-btn" id="btnFindGarden">🔍 Поиск</button>
         <button class="top-btn admin-btn" id="adminToggleBtn">🔑 Админ</button>
     </div>
-    
     <div class="legend" id="legend">
         💧 тап — полить (макс. 3) &nbsp;|&nbsp; ✨ двойной тап — светлячок (макс. 1) &nbsp;|&nbsp; наведи — прочитать
     </div>
-    
     <div class="notification" id="notification"></div>
     <div class="admin-notification" id="adminNotification">👑 Администратор на сервере</div>
-    
     <div class="input-panel">
         <input type="text" id="textInput" placeholder="Напиши то, что не отправил..." maxlength="300">
-        <button onclick="plantSeed()">Посадить 🌱</button>
+        <button id="plantButton">Посадить 🌱</button>
     </div>
 
     <script type="module">
-        // Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue, set, push, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue, set, push, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBTLj6o4j4q4q4q4q4q4q4q4q4q4q4q4q4",
-            authDomain: "sad-zapozdalyh-slov.firebaseapp.com",
-            databaseURL: "https://sad-zapozdalyh-slov-default-rtdb.firebaseio.com",
-            projectId: "sad-zapozdalyh-slov",
-            storageBucket: "sad-zapozdalyh-slov.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890"
+            apiKey: "AIzaSyB6FjbcftgcfO8wi_AqvphCeEyYpY7JRQY",
+            authDomain: "garden-3783e.firebaseapp.com",
+            databaseURL: "https://garden-3783e-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "garden-3783e",
+            storageBucket: "garden-3783e.firebasestorage.app",
+            messagingSenderId: "1057169550832",
+            appId: "1:1057169550832:web:596617ce1e0e4641acc135"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
         const MAX_WATER = 3;
         const MAX_FIREFLIES = 1;
         const MIN_PLANT_DISTANCE = 130;
@@ -632,152 +462,8 @@
         let isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
         let onlineCount = 0;
         let myUserId = 'user_' + Math.random().toString(36).substr(2, 9);
-        let onlineRef = null;
-        let plantsRef = null;
 
-        // === Firebase: онлайн-статус ===
-        function setupOnlineStatus() {
-            onlineRef = ref(db, 'online/' + myUserId);
-            const userRef = onlineRef;
-            
-            // Записываем что мы онлайн
-            set(userRef, {
-                lastSeen: Date.now()
-            });
-            
-            // Удаляем при уходе
-            window.addEventListener('beforeunload', () => {
-                remove(userRef);
-            });
-            
-            // Слушаем онлайн
-            const onlineListRef = ref(db, 'online');
-            onValue(onlineListRef, (snapshot) => {
-                const data = snapshot.val() || {};
-                onlineCount = Object.keys(data).length;
-                document.getElementById('onlineCount').textContent = onlineCount + ' онлайн';
-            });
-        }
-
-        // === Firebase: синхронизация растений ===
-        function setupPlantsSync() {
-            plantsRef = ref(db, 'plants');
-            
-            // Слушаем новые растения от других
-            onValue(plantsRef, (snapshot) => {
-                const data = snapshot.val() || {};
-                const serverPlants = Object.entries(data).map(([id, p]) => ({...p, firebaseId: id}));
-                
-                // Удаляем растения, которых нет на сервере
-                allPlants = allPlants.filter(localPlant => {
-                    const exists = serverPlants.find(sp => sp.firebaseId === localPlant.firebaseId);
-                    if (!exists && localPlant.firebaseId) {
-                        localPlant.giftedFireflies.forEach(f => f.remove());
-                        localPlant.el.remove();
-                        return false;
-                    }
-                    return true;
-                });
-                
-                // Добавляем/обновляем растения с сервера
-                serverPlants.forEach(serverPlant => {
-                    const existing = allPlants.find(p => p.firebaseId === serverPlant.firebaseId);
-                    if (!existing) {
-                        // Новое растение — создаём
-                        createPlantFromServer(serverPlant);
-                    } else {
-                        // Обновляем существующее
-                        updatePlantFromServer(existing, serverPlant);
-                    }
-                });
-                
-                plantCount = allPlants.length;
-                document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
-                
-                if (isAdmin) {
-                    showAllDeleteButtons();
-                }
-            });
-        }
-
-        function createPlantFromServer(data) {
-            const plant = plants.find(p => p.type === data.type) || plants[0];
-            const imgSrc = drawPlant(data.type, plant.color);
-            
-            const wrapper = document.createElement('div');
-            wrapper.className = 'plant-wrapper';
-            wrapper.style.left = data.x + 'px';
-            wrapper.style.top = data.y + 'px';
-            wrapper.style.width = '70px';
-            wrapper.style.height = '120px';
-            
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.className = 'plant-img';
-            img.style.width = '70px';
-            img.style.height = '100px';
-            wrapper.appendChild(img);
-            
-            const plantData = {
-                x: data.x, y: data.y, el: wrapper, text: data.text,
-                name: plant.name, emoji: plant.emoji, type: data.type,
-                watered: data.watered || 0, fireflies: data.fireflies || 0,
-                giftedFireflies: [], plantedAt: data.plantedAt || Date.now(),
-                firebaseId: data.firebaseId
-            };
-            
-            setupPlantInteractions(plantData);
-            meadowLayer.appendChild(wrapper);
-            allPlants.push(plantData);
-            
-            if (isAdmin) addDeleteButton(plantData);
-        }
-
-        function updatePlantFromServer(localPlant, serverPlant) {
-            if (serverPlant.watered !== localPlant.watered || serverPlant.fireflies !== localPlant.fireflies) {
-                localPlant.watered = serverPlant.watered || 0;
-                localPlant.fireflies = serverPlant.fireflies || 0;
-                updatePlantIndicators(localPlant);
-            }
-        }
-
-        function savePlantToFirebase(plantData) {
-            const newPlantRef = push(plantsRef);
-            const firebaseId = newPlantRef.key;
-            plantData.firebaseId = firebaseId;
-            
-            set(newPlantRef, {
-                x: plantData.x,
-                y: plantData.y,
-                text: plantData.text,
-                type: plantData.type,
-                watered: plantData.watered,
-                fireflies: plantData.fireflies,
-                plantedAt: plantData.plantedAt
-            });
-        }
-
-        function updatePlantOnFirebase(plantData) {
-            if (!plantData.firebaseId) return;
-            const plantRef = ref(db, 'plants/' + plantData.firebaseId);
-            set(plantRef, {
-                x: plantData.x,
-                y: plantData.y,
-                text: plantData.text,
-                type: plantData.type,
-                watered: plantData.watered,
-                fireflies: plantData.fireflies,
-                plantedAt: plantData.plantedAt
-            });
-        }
-
-        function deletePlantFromFirebase(plantData) {
-            if (!plantData.firebaseId) return;
-            const plantRef = ref(db, 'plants/' + plantData.firebaseId);
-            remove(plantRef);
-        }
-
-        // === НЕБО ===
+        // НЕБО
         const sky = document.getElementById('sky');
         for (let i = 0; i < 120; i++) {
             const star = document.createElement('div');
@@ -789,7 +475,6 @@
             star.style.animationDelay = Math.random() * 3 + 's';
             sky.appendChild(star);
         }
-        
         function spawnComet() {
             const comet = document.createElement('div');
             comet.className = 'comet';
@@ -800,19 +485,14 @@
             sky.appendChild(comet);
             setTimeout(() => comet.remove(), 3500);
         }
-        
         setTimeout(() => {
             spawnComet();
             showNotification('☄️ Загадай желание ✨', 4000);
-            setInterval(() => {
-                spawnComet();
-                showNotification('☄️ Загадай желание ✨', 4000);
-            }, 300000);
+            setInterval(() => { spawnComet(); showNotification('☄️ Загадай желание ✨', 4000); }, 300000);
         }, 10000);
-        
-        // === СЛОЙ ЗЕМЛИ ===
+
+        // ПОТЕРЯННЫЕ РАСТЕНИЯ (ТРАВА В ЗЕМЛЕ)
         const earthLayer = document.getElementById('earthLayer');
-        
         function createLostPlant(type) {
             const plant = document.createElement('div');
             plant.className = 'lost-plant';
@@ -851,7 +531,6 @@
             plant.style.height = '70px';
             return plant;
         }
-        
         const lostPlantTypes = ['grass', 'grass', 'grass', 'flower', 'flower', 'mushroom', 'fern'];
         for (let i = 0; i < 15; i++) {
             const type = lostPlantTypes[Math.floor(Math.random() * lostPlantTypes.length)];
@@ -863,15 +542,13 @@
             plant.style.transform = `scale(${0.6 + Math.random() * 0.8})`;
             earthLayer.appendChild(plant);
         }
-        
-        // === ЛУГ ===
+
+        // ЛУГ И ПОЗИЦИЯ
         const meadowLayer = document.getElementById('meadowLayer');
         const meadowBg = document.getElementById('meadowBg');
         const viewport = document.getElementById('viewport');
-        
         let MAP_WIDTH = BASE_MAP_W;
         let MAP_HEIGHT = BASE_MAP_H;
-        
         function updateMeadowSize() {
             meadowLayer.style.width = MAP_WIDTH + 'px';
             meadowLayer.style.height = MAP_HEIGHT + 'px';
@@ -879,7 +556,6 @@
             meadowBg.style.height = MAP_HEIGHT + 'px';
         }
         updateMeadowSize();
-        
         function spawnBackgroundFireflies() {
             meadowBg.querySelectorAll('.firefly').forEach(f => f.remove());
             const count = Math.floor((MAP_WIDTH * MAP_HEIGHT) / 100000);
@@ -894,33 +570,130 @@
             }
         }
         spawnBackgroundFireflies();
-        
-        // === ПОЗИЦИЯ ===
         let mapX = -(MAP_WIDTH / 2) + window.innerWidth / 2;
         let mapY = -(MAP_HEIGHT / 2) + 350;
-        
         function clampMapPosition() {
             const vw = viewport.offsetWidth;
             const vh = viewport.offsetHeight;
             mapX = Math.min(0, Math.max(-MAP_WIDTH + vw, mapX));
             mapY = Math.min(0, Math.max(-MAP_HEIGHT + vh, mapY));
         }
-        
         function applyTransform() {
             meadowLayer.style.transform = `translate(${mapX}px, ${mapY}px)`;
         }
-        
         clampMapPosition();
         applyTransform();
-        
+
         let allPlants = [];
         let plantCount = 0;
         let activeTooltip = null;
         let clickTimers = new Map();
         let topBadges = [];
-        // === АДМИН ===
-        let adminClickTimer = null;
 
+        // FIREBASE СИНХРОНИЗАЦИЯ
+        function setupOnlineStatus() {
+            const userRef = ref(db, 'online/' + myUserId);
+            set(userRef, { lastSeen: Date.now() });
+            window.addEventListener('beforeunload', () => remove(userRef));
+            const onlineListRef = ref(db, 'online');
+            onValue(onlineListRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                onlineCount = Object.keys(data).length;
+                document.getElementById('onlineCount').textContent = onlineCount + ' онлайн';
+            });
+        }
+
+        function setupPlantsSync() {
+            const plantsRef = ref(db, 'plants');
+            onValue(plantsRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const serverPlants = Object.entries(data).map(([id, p]) => ({...p, firebaseId: id}));
+                allPlants = allPlants.filter(localPlant => {
+                    const exists = serverPlants.find(sp => sp.firebaseId === localPlant.firebaseId);
+                    if (!exists && localPlant.firebaseId) {
+                        localPlant.giftedFireflies.forEach(f => f.remove());
+                        localPlant.el.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                serverPlants.forEach(serverPlant => {
+                    const existing = allPlants.find(p => p.firebaseId === serverPlant.firebaseId);
+                    if (!existing) {
+                        createPlantFromServer(serverPlant);
+                    } else {
+                        updatePlantFromServer(existing, serverPlant);
+                    }
+                });
+                plantCount = allPlants.length;
+                document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
+                if (isAdmin) showAllDeleteButtons();
+            });
+        }
+
+        function createPlantFromServer(data) {
+            const plant = plants.find(p => p.type === data.type) || plants[0];
+            const imgSrc = drawPlant(data.type, plant.color);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'plant-wrapper';
+            wrapper.style.left = data.x + 'px';
+            wrapper.style.top = data.y + 'px';
+            wrapper.style.width = '70px';
+            wrapper.style.height = '120px';
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.className = 'plant-img';
+            img.style.width = '70px';
+            img.style.height = '100px';
+            wrapper.appendChild(img);
+            const plantData = {
+                x: data.x, y: data.y, el: wrapper, text: data.text,
+                name: plant.name, emoji: plant.emoji, type: data.type,
+                watered: data.watered || 0, fireflies: data.fireflies || 0,
+                giftedFireflies: [], plantedAt: data.plantedAt || Date.now(),
+                firebaseId: data.firebaseId
+            };
+            setupPlantInteractions(plantData);
+            meadowLayer.appendChild(wrapper);
+            allPlants.push(plantData);
+            if (isAdmin) addDeleteButton(plantData);
+        }
+
+        function updatePlantFromServer(localPlant, serverPlant) {
+            if (serverPlant.watered !== localPlant.watered || serverPlant.fireflies !== localPlant.fireflies) {
+                localPlant.watered = serverPlant.watered || 0;
+                localPlant.fireflies = serverPlant.fireflies || 0;
+                updatePlantIndicators(localPlant);
+            }
+        }
+
+        function savePlantToFirebase(plantData) {
+            const newPlantRef = push(ref(db, 'plants'));
+            const firebaseId = newPlantRef.key;
+            plantData.firebaseId = firebaseId;
+            set(newPlantRef, {
+                x: plantData.x, y: plantData.y, text: plantData.text,
+                type: plantData.type, watered: plantData.watered,
+                fireflies: plantData.fireflies, plantedAt: plantData.plantedAt
+            });
+        }
+
+        function updatePlantOnFirebase(plantData) {
+            if (!plantData.firebaseId) return;
+            set(ref(db, 'plants/' + plantData.firebaseId), {
+                x: plantData.x, y: plantData.y, text: plantData.text,
+                type: plantData.type, watered: plantData.watered,
+                fireflies: plantData.fireflies, plantedAt: plantData.plantedAt
+            });
+        }
+
+        function deletePlantFromFirebase(plantData) {
+            if (!plantData.firebaseId) return;
+            remove(ref(db, 'plants/' + plantData.firebaseId));
+        }
+
+        // АДМИН
+        let adminClickTimer = null;
         function updateAdminButtonText() {
             const btn = document.getElementById('adminToggleBtn');
             if (isAdmin) {
@@ -932,7 +705,6 @@
 
         document.getElementById('adminToggleBtn').addEventListener('click', function(e) {
             e.stopPropagation();
-            
             if (isAdmin) {
                 isAdmin = false;
                 document.getElementById('adminToggleBtn').classList.remove('admin-active');
@@ -942,14 +714,10 @@
                 showNotification('👋 Админ-режим выключен');
                 return;
             }
-            
             if (!adminClickTimer) {
-                adminClickTimer = setTimeout(() => {
-                    adminClickTimer = null;
-                }, 400);
+                adminClickTimer = setTimeout(() => { adminClickTimer = null; }, 400);
                 return;
             }
-            
             clearTimeout(adminClickTimer);
             adminClickTimer = null;
             showAdminLoginMenu();
@@ -958,82 +726,46 @@
         function showAdminLoginMenu() {
             const oldMenu = document.querySelector('.admin-login-menu');
             if (oldMenu) oldMenu.remove();
-            
             const menu = document.createElement('div');
             menu.className = 'admin-login-menu';
             menu.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 300;
-                background: rgba(20, 5, 5, 0.97);
-                border: 2px solid rgba(255, 100, 100, 0.5);
-                border-radius: 15px;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                pointer-events: auto;
-                backdrop-filter: blur(15px);
-                min-width: 250px;
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 300;
+                background: rgba(20, 5, 5, 0.97); border: 2px solid rgba(255, 100, 100, 0.5);
+                border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 10px;
+                pointer-events: auto; backdrop-filter: blur(15px); min-width: 250px;
             `;
-            
             menu.innerHTML = `
-                <div style="color:#ff9a9a; text-align:center; font-size:14px; margin-bottom:5px;">🔐 Вход в админ-режим</div>
+                <div style="color:#ff9a9a; text-align:center; font-size:14px;">🔐 Вход в админ-режим</div>
                 <input type="password" id="adminPasswordInput" placeholder="Введите пароль..." 
                     style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,100,100,0.3); color: #ffcccc; 
                     padding: 10px; border-radius: 8px; font-family: 'Georgia', serif; font-size: 14px; outline: none;">
                 <div style="display: flex; gap: 8px;">
                     <button id="adminLoginBtn" style="flex:1; background: rgba(200,50,50,0.8); color: #fff; border: none; 
-                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">
-                        Войти 👑
-                    </button>
+                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Войти 👑</button>
                     <button id="adminCancelBtn" style="flex:1; background: rgba(100,100,100,0.5); color: #ccc; border: none; 
-                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">
-                        Отмена
-                    </button>
+                        padding: 8px; border-radius: 8px; cursor: pointer; font-family: 'Georgia', serif;">Отмена</button>
                 </div>
                 <div id="adminLoginError" style="color:#ff4444; font-size:11px; text-align:center; display:none;"></div>
             `;
-            
             document.body.appendChild(menu);
-            
             const input = document.getElementById('adminPasswordInput');
             const loginBtn = document.getElementById('adminLoginBtn');
             const cancelBtn = document.getElementById('adminCancelBtn');
             const errorEl = document.getElementById('adminLoginError');
-            
             loginBtn.addEventListener('click', () => {
-                if (input.value === ADMIN_PASSWORD) {
-                    menu.remove();
-                    activateAdmin();
-                } else {
-                    errorEl.textContent = '❌ Неверный пароль';
-                    errorEl.style.display = 'block';
-                    input.value = '';
-                    input.focus();
-                }
+                if (input.value === ADMIN_PASSWORD) { menu.remove(); activateAdmin(); }
+                else { errorEl.textContent = '❌ Неверный пароль'; errorEl.style.display = 'block'; input.value = ''; input.focus(); }
             });
-            
-            cancelBtn.addEventListener('click', () => {
-                menu.remove();
-            });
-            
+            cancelBtn.addEventListener('click', () => menu.remove());
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') loginBtn.click();
                 if (e.key === 'Escape') menu.remove();
             });
-            
             setTimeout(() => {
                 document.addEventListener('click', function closeMenu(e) {
-                    if (!menu.contains(e.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
+                    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
                 });
             }, 100);
-            
             setTimeout(() => input.focus(), 150);
         }
 
@@ -1043,187 +775,108 @@
             updateAdminButtonText();
             showAllDeleteButtons();
             updateCooldownButton();
-            
             const adminNotif = document.getElementById('adminNotification');
             adminNotif.classList.add('show');
             setTimeout(() => adminNotif.classList.remove('show'), 3000);
-            
             showNotification('👑 Администратор на сервере', 3000);
         }
-        
-        function hideAllDeleteButtons() {
-            document.querySelectorAll('.delete-btn').forEach(b => b.remove());
-        }
-        
-        function showAllDeleteButtons() {
-            allPlants.forEach(plantData => {
-                addDeleteButton(plantData);
-            });
-        }
-        
+
+        function hideAllDeleteButtons() { document.querySelectorAll('.delete-btn').forEach(b => b.remove()); }
+        function showAllDeleteButtons() { allPlants.forEach(p => addDeleteButton(p)); }
+
         function addDeleteButton(plantData) {
             const oldBtn = plantData.el.querySelector('.delete-btn');
             if (oldBtn) oldBtn.remove();
-            
             const btn = document.createElement('button');
             btn.className = 'delete-btn visible';
             btn.textContent = '×';
             btn.title = 'Удалить растение';
-            
-            const deleteHandler = (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                deletePlant(plantData);
-            };
-            
-            btn.addEventListener('click', deleteHandler);
-            btn.addEventListener('touchend', deleteHandler);
+            const handler = (e) => { e.stopPropagation(); e.preventDefault(); deletePlant(plantData); };
+            btn.addEventListener('click', handler);
+            btn.addEventListener('touchend', handler);
             plantData.el.appendChild(btn);
         }
-        
+
         function deletePlant(plantData) {
             plantData.giftedFireflies.forEach(f => f.remove());
             plantData.el.remove();
             deletePlantFromFirebase(plantData);
             const index = allPlants.indexOf(plantData);
-            if (index > -1) {
-                allPlants.splice(index, 1);
-                plantCount--;
-                document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
-            }
+            if (index > -1) { allPlants.splice(index, 1); plantCount--; }
+            document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
             showNotification('🗑️ Растение удалено', 1500);
         }
-        
-        // === АНИМАЦИЯ ===
+
+        // АНИМАЦИЯ
         function lerp(a,b,t){return a+(b-a)*t;}
         function easeInOutCubic(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
-        
-        let animStartX, animStartY, animEndX, animEndY;
-        let animStartTime, animDuration;
-        let isAnimating = false;
-        
-        function animateTo(nx, ny, dur) {
-            animStartX = mapX;
-            animStartY = mapY;
-            animEndX = nx;
-            animEndY = ny;
-            animStartTime = performance.now();
-            animDuration = dur || 1200;
-            
-            if (!isAnimating) {
-                isAnimating = true;
-                requestAnimationFrame(animationLoop);
-            }
+        let animStartX, animStartY, animEndX, animEndY, animStartTime, animDuration, isAnimating = false;
+        function animateTo(nx, ny, dur = 1200) {
+            animStartX = mapX; animStartY = mapY; animEndX = nx; animEndY = ny;
+            animStartTime = performance.now(); animDuration = dur;
+            if (!isAnimating) { isAnimating = true; requestAnimationFrame(animationLoop); }
         }
-        
         function animationLoop(ts) {
-            const elapsed = ts - animStartTime;
-            const p = Math.min(elapsed / animDuration, 1);
+            const p = Math.min((ts - animStartTime) / animDuration, 1);
             const e = easeInOutCubic(p);
-            
-            mapX = lerp(animStartX, animEndX, e);
-            mapY = lerp(animStartY, animEndY, e);
-            
+            mapX = lerp(animStartX, animEndX, e); mapY = lerp(animStartY, animEndY, e);
             applyTransform();
-            
-            if (p < 1) {
-                requestAnimationFrame(animationLoop);
-            } else {
-                mapX = animEndX;
-                mapY = animEndY;
-                isAnimating = false;
-                applyTransform();
-            }
+            if (p < 1) requestAnimationFrame(animationLoop);
+            else { mapX = animEndX; mapY = animEndY; isAnimating = false; applyTransform(); }
         }
-        
         function centerOnPlant(px, py) {
-            const vw = viewport.offsetWidth;
-            const vh = viewport.offsetHeight;
-            let tx = -(px - vw / 2);
-            let ty = -(py - vh / 2);
-            
+            const vw = viewport.offsetWidth, vh = viewport.offsetHeight;
+            let tx = -(px - vw/2), ty = -(py - vh/2);
             tx = Math.min(0, Math.max(-MAP_WIDTH + vw, tx));
             ty = Math.min(0, Math.max(-MAP_HEIGHT + vh, ty));
-            
             clampMapPosition();
             applyTransform();
-            
             animateTo(tx, ty, 1000);
         }
-        
-        // === DRAG ===
-        let isDragging = false, startX, startY, startMapX, startMapY;
-        
+
+        // DRAG
+        let isDragging = false, startDragX, startDragY, startMapX, startMapY;
         function onDragStart(e) {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            if (e.target.closest('.plant-wrapper')) return;
-            if (e.target.closest('.top-panel')) return;
-            if (e.target.closest('.input-panel')) return;
-            if (e.target.closest('.delete-btn')) return;
-            if (e.target.closest('.admin-login-menu')) return;
-            
-            isDragging = true;
-            startX = clientX;
-            startY = clientY;
-            startMapX = mapX;
-            startMapY = mapY;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            if (e.target.closest('.plant-wrapper') || e.target.closest('.top-panel') || 
+                e.target.closest('.input-panel') || e.target.closest('.delete-btn') || 
+                e.target.closest('.admin-login-menu')) return;
+            isDragging = true; startDragX = cx; startDragY = cy;
+            startMapX = mapX; startMapY = mapY;
             viewport.classList.add('grabbing');
             hideTooltip();
         }
-        
         function onDragMove(e) {
             if (!isDragging) return;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            const dx = clientX - startX;
-            const dy = clientY - startY;
-            mapX = startMapX + dx;
-            mapY = startMapY + dy;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            mapX = startMapX + (cx - startDragX);
+            mapY = startMapY + (cy - startDragY);
             clampMapPosition();
             applyTransform();
         }
-        
         function onDragEnd() {
-            if (isDragging) {
-                isDragging = false;
-                viewport.classList.remove('grabbing');
-            }
+            if (isDragging) { isDragging = false; viewport.classList.remove('grabbing'); }
         }
-        
         viewport.addEventListener('mousedown', onDragStart);
         window.addEventListener('mousemove', onDragMove);
         window.addEventListener('mouseup', onDragEnd);
-        
         viewport.addEventListener('touchstart', onDragStart, {passive: false});
         window.addEventListener('touchmove', onDragMove, {passive: false});
         window.addEventListener('touchend', onDragEnd);
-        
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
-        document.addEventListener('gesturechange', (e) => e.preventDefault());
-        document.addEventListener('gestureend', (e) => e.preventDefault());
-        
-        // === УВЕДОМЛЕНИЯ ===
+        document.addEventListener('gesturestart', e => e.preventDefault());
+
+        // УВЕДОМЛЕНИЯ
         function showNotification(t, d = 2000) {
             const n = document.getElementById('notification');
-            n.textContent = t;
-            n.classList.add('show');
-            clearTimeout(n._t);
-            n._t = setTimeout(() => n.classList.remove('show'), d);
+            n.textContent = t; n.classList.add('show');
+            clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), d);
         }
-        
-        function findGarden() {
-            if (!allPlants.length) { showNotification('🌱 Сад пуст'); return; }
-            let sx = 0, sy = 0;
-            allPlants.forEach(p => { sx += p.x; sy += p.y; });
-            centerOnPlant(sx / allPlants.length, sy / allPlants.length);
-        }
-        
+
         function highlightPlant(p) { p.el.classList.add('highlight'); setTimeout(() => p.el.classList.remove('highlight'), 2400); }
         function clearTopBadges() { topBadges.forEach(b => b.remove()); topBadges = []; }
-        
+
         function showTop3() {
             clearTopBadges();
             if (!allPlants.length) { showNotification('🌱 Сад пуст'); return; }
@@ -1236,28 +889,33 @@
             const medals = ['🥇', '🥈', '🥉'];
             top.forEach((p, i) => {
                 const badge = document.createElement('div');
-                badge.className = 'top-badge';
-                badge.textContent = medals[i];
-                p.el.appendChild(badge);
-                topBadges.push(badge);
+                badge.className = 'top-badge'; badge.textContent = medals[i];
+                p.el.appendChild(badge); topBadges.push(badge);
             });
             if (top[0]) { centerOnPlant(top[0].x, top[0].y); highlightPlant(top[0]); showNotification(`🥇 1 место: ${top[0].emoji} ${top[0].name} (${top[0].fireflies + top[0].watered})`, 3000); }
             if (top[1]) setTimeout(() => { centerOnPlant(top[1].x, top[1].y); highlightPlant(top[1]); showNotification(`🥈 2 место: ${top[1].emoji} ${top[1].name} (${top[1].fireflies + top[1].watered})`, 3000); }, 2500);
             if (top[2]) setTimeout(() => { centerOnPlant(top[2].x, top[2].y); highlightPlant(top[2]); showNotification(`🥉 3 место: ${top[2].emoji} ${top[2].name} (${top[2].fireflies + top[2].watered})`, 3000); }, 5000);
             setTimeout(clearTopBadges, 8000);
         }
-        // === ТУЛТИП ===
+
+        function findGarden() {
+            if (!allPlants.length) { showNotification('🌱 Сад пуст'); return; }
+            let sx = 0, sy = 0;
+            allPlants.forEach(p => { sx += p.x; sy += p.y; });
+            centerOnPlant(sx / allPlants.length, sy / allPlants.length);
+        }
+
+        // ТУЛТИП
         function showTooltip(e, plantData) {
             hideTooltip();
             const tip = document.createElement('div');
-            tip.className = 'tooltip';
-            tip.id = 'activeTooltip';
-            const truncated = plantData.text.length > 150 ? plantData.text.substring(0, 150) + '...' : plantData.text;
+            tip.className = 'tooltip'; tip.id = 'activeTooltip';
+            const truncated = plantData.text.length > 150 ? plantData.text.substring(0,150)+'...' : plantData.text;
             let w = '';
             if (!isAdmin && plantData.watered >= MAX_WATER) w += '<div class="water-limit-warning">🚫 Полив исчерпан</div>';
             if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) w += '<div class="water-limit-warning">✨ Светлячок уже тут</div>';
             tip.innerHTML = `
-                <div style="margin-bottom:4px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:10px;color:#5a8a5a;">#${allPlants.indexOf(plantData) + 1}</span></div>
+                <div style="margin-bottom:4px;">${plantData.emoji} <strong>${plantData.name}</strong> <span style="font-size:10px;color:#5a8a5a;">#${allPlants.indexOf(plantData)+1}</span></div>
                 <div style="color:#a0c0a0;font-style:italic;">«${escapeHtml(truncated)}»</div>
                 <div class="tooltip-actions"><span>💧 ${plantData.watered}/${isAdmin ? '∞' : MAX_WATER}</span><span>✨ ${plantData.fireflies}/${isAdmin ? '∞' : MAX_FIREFLIES}</span><span>⭐ ${plantData.fireflies + plantData.watered}</span></div>
                 ${w}
@@ -1269,108 +927,66 @@
         }
         function positionTooltip(e) {
             if (!activeTooltip) return;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            let l = clientX + 20, t = clientY - 30;
-            if (l + 290 > window.innerWidth) l = clientX - 300;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let l = cx + 20, t = cy - 30;
+            if (l + 290 > window.innerWidth) l = cx - 300;
             if (t < 10) t = 10;
             activeTooltip.style.left = l + 'px';
             activeTooltip.style.top = t + 'px';
         }
         function hideTooltip() { if (activeTooltip) { activeTooltip.remove(); activeTooltip = null; } }
         function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-        
-        // === ВАЛИДАЦИЯ ===
+
+        // ВАЛИДАЦИЯ
         function isValidMessage(text) {
             if (text.length < 2) return false;
             if (text.length > 300) return false;
-            
             const lower = text.toLowerCase().trim();
-            
-            const whitelist = [
-                'привет', 'пока', 'спасибо', 'благодарю', 'извини', 'прости',
-                'люблю', 'скучаю', 'обнимаю', 'целую', 'жаль', 'больно',
-                'грустно', 'радостно', 'одиноко', 'страшно', 'обидно',
-                'надеюсь', 'верю', 'мечтаю', 'хочу', 'могу', 'буду',
-                'помню', 'забыл', 'забыла', 'устал', 'устала',
-                'да', 'нет', 'ок', 'окей', 'ладно', 'хорошо', 'плохо',
-                'зачем', 'почему', 'когда', 'где', 'как', 'кто', 'что',
-                'приходи', 'уходи', 'останься', 'вернись',
-                'hi', 'hello', 'bye', 'sorry', 'love', 'miss', 'thanks',
-                'помоги', 'помогите', 'держись',
-                'всё', 'все', 'ничего', 'пустота', 'тишина', 'темнота',
-                'свет', 'тьма', 'ночь', 'день', 'утро', 'вечер',
-                'мама', 'папа', 'сын', 'дочь', 'брат', 'сестра', 'друг', 'подруга',
-                'дом', 'семья', 'счастье', 'горе', 'боль', 'радость', 'печаль',
-                'я', 'ты', 'мы', 'он', 'она', 'они', 'меня', 'тебя', 'нас'
-            ];
-            
+            const whitelist = ['привет','пока','спасибо','благодарю','извини','прости','люблю','скучаю','обнимаю','целую','жаль','больно','грустно','радостно','одиноко','страшно','обидно','надеюсь','верю','мечтаю','хочу','могу','буду','помню','забыл','забыла','устал','устала','да','нет','ок','окей','ладно','хорошо','плохо','зачем','почему','когда','где','как','кто','что','приходи','уходи','останься','вернись','hi','hello','bye','sorry','love','miss','thanks','помоги','помогите','держись','всё','все','ничего','пустота','тишина','темнота','свет','тьма','ночь','день','утро','вечер','мама','папа','сын','дочь','брат','сестра','друг','подруга','дом','семья','счастье','горе','боль','радость','печаль','я','ты','мы','он','она','они','меня','тебя','нас'];
             const wordsOnly = lower.replace(/[^a-zа-яё\s]/g, '');
             if (whitelist.includes(wordsOnly)) return true;
-            
             for (const phrase of whitelist) {
                 if (wordsOnly.startsWith(phrase + ' ') || wordsOnly.startsWith(phrase + ',')) return true;
             }
-            
             const letters = lower.match(/[а-яёa-z]/gi) || [];
             if (letters.length < 2) return false;
-            
             const charCount = {};
-            for (const c of lower) {
-                charCount[c] = (charCount[c] || 0) + 1;
-            }
-            const maxCharRatio = Math.max(...Object.values(charCount)) / lower.length;
-            if (maxCharRatio > 0.4) return false;
-            
+            for (const c of lower) { charCount[c] = (charCount[c] || 0) + 1; }
+            if (Math.max(...Object.values(charCount)) / lower.length > 0.4) return false;
             if (/([a-zа-яё])\1\1/i.test(lower)) return false;
-            
-            const keyboardPatterns = [
-                'qwerty', 'asdfgh', 'zxcvbn', 'йцукен', 'фывапр', 'ячсмит',
-                'qweqwe', 'asdasd', 'zxczxc', 'qweasd', 'asdzxc', 'йцуфыв',
-                'цукенг', 'вапрол', 'qazwsx', 'wsxedc', 'rfvtgb'
-            ];
+            const keyboardPatterns = ['qwerty','asdfgh','zxcvbn','йцукен','фывапр','ячсмит','qweqwe','asdasd','zxczxc','qweasd','asdzxc','йцуфыв','цукенг','вапрол','qazwsx','wsxedc','rfvtgb'];
             const lettersOnly = lower.replace(/[^a-zа-яё]/g, '');
-            for (const pattern of keyboardPatterns) {
-                if (lettersOnly.includes(pattern)) return false;
-            }
-            
+            for (const pattern of keyboardPatterns) { if (lettersOnly.includes(pattern)) return false; }
             if (lettersOnly.length > 10) {
-                const letterFreq = {};
-                for (const c of lettersOnly) {
-                    letterFreq[c] = (letterFreq[c] || 0) + 1;
-                }
-                const freqs = Object.values(letterFreq);
-                const avgFreq = freqs.reduce((a, b) => a + b, 0) / freqs.length;
-                const variance = freqs.reduce((sum, f) => sum + (f - avgFreq) ** 2, 0) / freqs.length;
+                const freq = {};
+                for (const c of lettersOnly) { freq[c] = (freq[c] || 0) + 1; }
+                const freqs = Object.values(freq);
+                const avg = freqs.reduce((a,b)=>a+b,0) / freqs.length;
+                const variance = freqs.reduce((s,f)=>s+(f-avg)**2,0) / freqs.length;
                 if (freqs.length > 5 && variance < 0.3) return false;
             }
-            
             if (lettersOnly.length > 8) {
                 const vowels = (lettersOnly.match(/[аеёиоуыэюяaeiou]/gi) || []).length;
                 const consonants = (lettersOnly.match(/[бвгджзйклмнпрстфхцчшщъьbcdfghjklmnpqrstvwxyz]/gi) || []).length;
                 if (consonants > 0 && vowels === 0) return false;
                 if (consonants > 0 && vowels / consonants < 0.15 && lettersOnly.length > 10) return false;
             }
-            
             if (letters.length > 6) {
-                let caseSwitches = 0;
+                let switches = 0;
                 for (let i = 1; i < letters.length; i++) {
-                    if ((letters[i - 1] === letters[i - 1].toUpperCase()) !== (letters[i] === letters[i].toUpperCase())) {
-                        caseSwitches++;
-                    }
+                    if ((letters[i-1]===letters[i-1].toUpperCase()) !== (letters[i]===letters[i].toUpperCase())) switches++;
                 }
-                if (caseSwitches >= letters.length * 0.5) return false;
+                if (switches >= letters.length * 0.5) return false;
             }
-            
             if (text.length > 20 && !text.includes(' ')) {
                 const words = text.match(/[а-яёa-z]+/gi) || [];
                 if (words.length === 1 && words[0].length > 20) return false;
             }
-            
             return true;
         }
-        
-        // === ПОЛИВ ===
+
+        // ПОЛИВ И СВЕТЛЯЧКИ
         function waterPlant(plantData, e) {
             if (!isAdmin && plantData.watered >= MAX_WATER) { showNotification('🌱 Полив исчерпан'); return; }
             plantData.watered++;
@@ -1381,9 +997,9 @@
                 const d = document.createElement('div');
                 d.className = 'water-drop';
                 d.style.position = 'fixed';
-                d.style.left = (r.left + r.width / 2 + (Math.random() - 0.5) * 40) + 'px';
-                d.style.top = (r.top + 30 + Math.random() * 10) + 'px';
-                d.style.animationDelay = (Math.random() * 0.3) + 's';
+                d.style.left = (r.left + r.width/2 + (Math.random()-0.5)*40) + 'px';
+                d.style.top = (r.top + 30 + Math.random()*10) + 'px';
+                d.style.animationDelay = (Math.random()*0.3) + 's';
                 d.style.zIndex = '100';
                 document.body.appendChild(d);
                 setTimeout(() => d.remove(), 800);
@@ -1392,8 +1008,7 @@
             if (isAdmin) showNotification('💧 Админ-полив', 1000);
             if (activeTooltip) showTooltip(e, plantData);
         }
-        
-        // === СВЕТЛЯЧОК ===
+
         function giftFirefly(plantData) {
             if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) { showNotification('✨ Уже есть светлячок'); return; }
             plantData.fireflies++;
@@ -1403,37 +1018,36 @@
             const gifted = document.createElement('div');
             gifted.className = 'gifted-firefly';
             gifted.style.position = 'fixed';
-            gifted.style.left = (r.left + r.width / 2) + 'px';
-            gifted.style.top = (r.top + r.height / 2) + 'px';
+            gifted.style.left = (r.left + r.width/2) + 'px';
+            gifted.style.top = (r.top + r.height/2) + 'px';
             gifted.style.zIndex = '100';
             document.body.appendChild(gifted);
-            
             const mf = document.createElement('div');
             mf.className = 'gifted-firefly';
-            mf.style.left = (plantData.x + (Math.random() - 0.5) * 30) + 'px';
-            mf.style.top = (plantData.y - 15 + (Math.random() - 0.5) * 20) + 'px';
+            mf.style.left = (plantData.x + (Math.random()-0.5)*30) + 'px';
+            mf.style.top = (plantData.y - 15 + (Math.random()-0.5)*20) + 'px';
             meadowLayer.appendChild(mf);
             plantData.giftedFireflies.push(mf);
             setTimeout(() => gifted.remove(), 1000);
             if (isAdmin) showNotification('✨ Админ-светлячок', 1000);
             if (!isAdmin && plantData.fireflies >= MAX_FIREFLIES) showNotification('✨ Светлячок остался');
         }
-        
+
         function updatePlantIndicators(plantData) {
             const w = plantData.el;
             let ind = w.querySelector('.plant-indicators');
             if (!ind) { ind = document.createElement('div'); ind.className = 'plant-indicators'; w.appendChild(ind); }
             let h = '';
-            if (plantData.watered > 0) h += `<span>💧${plantData.watered}</span> `;
-            if (plantData.fireflies > 0) h += `<span>✨${plantData.fireflies}</span>`;
+            if (plantData.watered > 0) h += '<span>💧'+plantData.watered+'</span> ';
+            if (plantData.fireflies > 0) h += '<span>✨'+plantData.fireflies+'</span>';
             ind.innerHTML = h;
         }
-        
-        function getDistance(x1, y1, x2, y2) { return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2); }
-        
-        // === РАСШИРЕНИЕ ЛУГА ===
+
+        function getDistance(x1,y1,x2,y2) { return Math.sqrt((x1-x2)**2+(y1-y2)**2); }
+
+        // РАСШИРЕНИЕ ЛУГА
         function expandMeadow(direction) {
-            switch (direction) {
+            switch(direction) {
                 case 'right': MAP_WIDTH += EXPAND_STEP; break;
                 case 'left': MAP_WIDTH += EXPAND_STEP; mapX -= EXPAND_STEP; break;
                 case 'down': MAP_HEIGHT += EXPAND_STEP; break;
@@ -1445,36 +1059,36 @@
             applyTransform();
             showNotification('🌍 Луг расширился!', 1500);
         }
-        
+
         function findValidPosition(nearPlant) {
             for (let a = 0; a < 50; a++) {
-                const off = 200 + a * 25;
-                const ang = Math.random() * Math.PI * 2;
-                const dist = off + Math.random() * 200;
-                const nx = nearPlant.x + Math.cos(ang) * dist;
-                const ny = nearPlant.y + Math.sin(ang) * dist;
-                if (nx < 50 || ny < 50 || nx > MAP_WIDTH - 50 || ny > MAP_HEIGHT * 0.7) continue;
+                const off = 200 + a*25;
+                const ang = Math.random()*Math.PI*2;
+                const dist = off + Math.random()*200;
+                const nx = nearPlant.x + Math.cos(ang)*dist;
+                const ny = nearPlant.y + Math.sin(ang)*dist;
+                if (nx < 50 || ny < 50 || nx > MAP_WIDTH-50 || ny > MAP_HEIGHT*0.7) continue;
                 let tc = false;
                 for (const p of allPlants) {
                     if (getDistance(nx, ny, p.x, p.y) < MIN_PLANT_DISTANCE) { tc = true; break; }
                 }
                 if (!tc) return { x: nx, y: ny };
             }
-            const dirs = ['right', 'left', 'down', 'up'];
-            const dir = dirs[Math.floor(Math.random() * dirs.length)];
+            const dirs = ['right','left','down','up'];
+            const dir = dirs[Math.floor(Math.random()*dirs.length)];
             expandMeadow(dir);
-            const ang = Math.random() * Math.PI * 2;
-            const dist = 400 + Math.random() * 300;
-            let nx = nearPlant.x + Math.cos(ang) * dist;
-            let ny = nearPlant.y + Math.sin(ang) * dist;
+            const ang = Math.random()*Math.PI*2;
+            const dist = 400 + Math.random()*300;
+            let nx = nearPlant.x + Math.cos(ang)*dist;
+            let ny = nearPlant.y + Math.sin(ang)*dist;
             if (dir === 'right') nx = MAP_WIDTH - 200;
             else if (dir === 'left') nx = 200;
-            else if (dir === 'down') ny = MAP_HEIGHT * 0.6;
+            else if (dir === 'down') ny = MAP_HEIGHT*0.6;
             else if (dir === 'up') ny = 200;
-            return { x: Math.max(100, Math.min(MAP_WIDTH - 100, nx)), y: Math.max(50, Math.min(MAP_HEIGHT * 0.7, ny)) };
+            return { x: Math.max(100, Math.min(MAP_WIDTH-100, nx)), y: Math.max(50, Math.min(MAP_HEIGHT*0.7, ny)) };
         }
-        
-        // === 20 ВИДОВ РАСТЕНИЙ ===
+
+        // 20 ВИДОВ РАСТЕНИЙ
         const plants = [
             {name:'Плакучая ива', color:'#7b9e7b', emoji:'🌿', type:'willow'},
             {name:'Тёмный терновник', color:'#3a2030', emoji:'🥀', type:'thorn'},
@@ -1495,171 +1109,170 @@
             {name:'Горная сосна', color:'#3a5a3a', emoji:'🌲', type:'pine'},
             {name:'Плакучая берёза', color:'#d0d8c0', emoji:'🌳', type:'birch'},
             {name:'Дикая ежевика', color:'#4a2040', emoji:'🫐', type:'berry'},
-            {name:'Степной ковыль', color:'#c8c898', emoji:'🌾', type:'grass'},
+            {name:'Степной ковыль', color:'#c8c898', emoji:'🌾', type:'grass'}
         ];
-        
+
         function getPlantByText(text) {
             return plants[Math.floor(Math.random() * plants.length)];
         }
-        
+
         function drawPlant(type, color) {
             const c = document.createElement('canvas');
             c.width = 80; c.height = 120;
             const ctx = c.getContext('2d');
             ctx.translate(40, 110);
-            
             ctx.beginPath();
             ctx.moveTo(0, 0);
             ctx.quadraticCurveTo(-10, -40, -5, -80);
             ctx.strokeStyle = color;
             ctx.lineWidth = 3;
             ctx.stroke();
-            
+
             if (type === 'willow') {
                 for (let i = 0; i < 7; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -30 - i * 8);
-                    ctx.quadraticCurveTo(-20, -40 - i * 8, -15 - i * 3, -60 - i * 10);
+                    ctx.beginPath(); ctx.moveTo(-5, -30-i*8);
+                    ctx.quadraticCurveTo(-20, -40-i*8, -15-i*3, -60-i*10);
                     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
                 }
-                ctx.beginPath(); ctx.arc(-5, -85, 22, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 22, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(123,158,123,0.7)'; ctx.fill();
             } else if (type === 'thorn') {
                 for (let i = 0; i < 5; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3, -20 - i * 12);
-                    ctx.lineTo(10 + i * 3, -25 - i * 12); ctx.lineTo(-3, -30 - i * 12);
+                    ctx.beginPath(); ctx.moveTo(-3, -20-i*12);
+                    ctx.lineTo(10+i*3, -25-i*12); ctx.lineTo(-3, -30-i*12);
                     ctx.fillStyle = '#4a1030'; ctx.fill();
                 }
-                ctx.beginPath(); ctx.arc(-3, -80, 8, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-3, -80, 8, 0, Math.PI*2);
                 ctx.fillStyle = '#3a2030'; ctx.fill();
             } else if (type === 'peony' || type === 'sakura') {
-                ctx.beginPath(); ctx.arc(-5, -85, 20, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 20, 0, Math.PI*2);
                 ctx.fillStyle = color + 'cc'; ctx.fill();
-                ctx.beginPath(); ctx.arc(-5, -85, 14, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 14, 0, Math.PI*2);
                 ctx.fillStyle = color; ctx.fill();
-                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2);
                 ctx.fillStyle = '#ffd700'; ctx.fill();
             } else if (type === 'oak') {
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -70);
                 ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 6; ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, -80, 25, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(0, -80, 25, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(70,100,50,0.8)'; ctx.fill();
             } else if (type === 'daisy') {
-                for (let a = 0; a < Math.PI * 2; a += Math.PI / 5) {
+                for (let a = 0; a < Math.PI*2; a += Math.PI/5) {
                     ctx.beginPath();
-                    ctx.ellipse(-5 + Math.cos(a) * 14, -85 + Math.sin(a) * 14, 8, 3, a, 0, Math.PI * 2);
+                    ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 8, 3, a, 0, Math.PI*2);
                     ctx.fillStyle = '#fafaf0'; ctx.fill();
                 }
-                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 6, 0, Math.PI*2);
                 ctx.fillStyle = '#ffd700'; ctx.fill();
             } else if (type === 'cactus') {
                 ctx.fillStyle = '#4a6a4a';
                 ctx.fillRect(-8, -80, 16, 70);
                 ctx.fillRect(8, -65, 14, 8);
                 ctx.fillRect(-22, -55, 14, 8);
-                ctx.beginPath(); ctx.arc(0, -85, 6, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(0, -85, 6, 0, Math.PI*2);
                 ctx.fillStyle = '#ff69b4'; ctx.fill();
             } else if (type === 'vine') {
                 for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -20 - i * 15);
-                    ctx.quadraticCurveTo(-25, -35 - i * 15, -15, -50 - i * 15);
+                    ctx.beginPath(); ctx.moveTo(-5, -20-i*15);
+                    ctx.quadraticCurveTo(-25, -35-i*15, -15, -50-i*15);
                     ctx.strokeStyle = '#9a9ac0'; ctx.lineWidth = 2; ctx.stroke();
                 }
-                ctx.beginPath(); ctx.arc(-10, -75, 10, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-10, -75, 10, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(180,180,220,0.6)'; ctx.fill();
             } else if (type === 'rose') {
                 for (let i = 0; i < 4; i++) {
                     ctx.beginPath();
-                    ctx.arc(-3 + i * 2, -82 - i * 3, 8 + i * 2, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(192,48,64,${0.3 + i * 0.15})`; ctx.fill();
+                    ctx.arc(-3+i*2, -82-i*3, 8+i*2, 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(192,48,64,${0.3+i*0.15})`; ctx.fill();
                 }
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80);
                 ctx.strokeStyle = '#8a2030'; ctx.lineWidth = 2; ctx.stroke();
             } else if (type === 'lily') {
                 for (let i = 0; i < 3; i++) {
                     ctx.beginPath();
-                    ctx.ellipse(-5, -85, 16, 4, (i * Math.PI) / 3, 0, Math.PI * 2);
+                    ctx.ellipse(-5, -85, 16, 4, (i*Math.PI)/3, 0, Math.PI*2);
                     ctx.fillStyle = 'rgba(208,216,208,0.7)'; ctx.fill();
                 }
-                ctx.beginPath(); ctx.arc(-5, -85, 4, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 4, 0, Math.PI*2);
                 ctx.fillStyle = '#f0e898'; ctx.fill();
             } else if (type === 'lavender' || type === 'violet') {
                 for (let i = 0; i < 5; i++) {
                     ctx.beginPath();
-                    ctx.arc(-5 + (i - 2) * 6, -70 - i * 5, 5, 0, Math.PI * 2);
+                    ctx.arc(-5+(i-2)*6, -70-i*5, 5, 0, Math.PI*2);
                     ctx.fillStyle = color; ctx.fill();
                 }
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80);
                 ctx.strokeStyle = '#5a5a5a'; ctx.lineWidth = 2; ctx.stroke();
             } else if (type === 'sunflower') {
-                for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+                for (let a = 0; a < Math.PI*2; a += Math.PI/8) {
                     ctx.beginPath();
-                    ctx.ellipse(-5 + Math.cos(a) * 14, -85 + Math.sin(a) * 14, 6, 3, a, 0, Math.PI * 2);
+                    ctx.ellipse(-5+Math.cos(a)*14, -85+Math.sin(a)*14, 6, 3, a, 0, Math.PI*2);
                     ctx.fillStyle = '#e8b030'; ctx.fill();
                 }
-                ctx.beginPath(); ctx.arc(-5, -85, 8, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 8, 0, Math.PI*2);
                 ctx.fillStyle = '#5a3a10'; ctx.fill();
             } else if (type === 'fern') {
                 for (let i = 0; i < 6; i++) {
-                    ctx.beginPath(); ctx.moveTo(-5, -25 - i * 10);
-                    ctx.quadraticCurveTo(-20, -30 - i * 10, -25, -40 - i * 10);
+                    ctx.beginPath(); ctx.moveTo(-5, -25-i*10);
+                    ctx.quadraticCurveTo(-20, -30-i*10, -25, -40-i*10);
                     ctx.strokeStyle = '#3a6a3a'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(-5, -25 - i * 10);
-                    ctx.quadraticCurveTo(10, -30 - i * 10, 15, -40 - i * 10);
+                    ctx.beginPath(); ctx.moveTo(-5, -25-i*10);
+                    ctx.quadraticCurveTo(10, -30-i*10, 15, -40-i*10);
                     ctx.stroke();
                 }
             } else if (type === 'poppy') {
-                for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+                for (let a = 0; a < Math.PI*2; a += Math.PI/2) {
                     ctx.beginPath();
-                    ctx.ellipse(-5 + Math.cos(a) * 10, -85 + Math.sin(a) * 10, 10, 6, a, 0, Math.PI * 2);
+                    ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*10, 10, 6, a, 0, Math.PI*2);
                     ctx.fillStyle = 'rgba(224,64,48,0.8)'; ctx.fill();
                 }
-                ctx.beginPath(); ctx.arc(-5, -85, 5, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(-5, -85, 5, 0, Math.PI*2);
                 ctx.fillStyle = '#1a1a1a'; ctx.fill();
             } else if (type === 'lotus') {
-                for (let a = 0; a < Math.PI * 2; a += Math.PI / 5) {
+                for (let a = 0; a < Math.PI*2; a += Math.PI/5) {
                     ctx.beginPath();
-                    ctx.ellipse(-5 + Math.cos(a) * 10, -85 + Math.sin(a) * 5, 8, 4, a, 0, Math.PI * 2);
+                    ctx.ellipse(-5+Math.cos(a)*10, -85+Math.sin(a)*5, 8, 4, a, 0, Math.PI*2);
                     ctx.fillStyle = 'rgba(240,240,232,0.9)'; ctx.fill();
                 }
             } else if (type === 'pine') {
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -80);
                 ctx.strokeStyle = '#4a3a2a'; ctx.lineWidth = 4; ctx.stroke();
                 for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(0, -40 - i * 12);
-                    ctx.lineTo(-15, -50 - i * 12); ctx.lineTo(0, -55 - i * 12);
-                    ctx.lineTo(15, -50 - i * 12); ctx.closePath();
+                    ctx.beginPath(); ctx.moveTo(0, -40-i*12);
+                    ctx.lineTo(-15, -50-i*12); ctx.lineTo(0, -55-i*12);
+                    ctx.lineTo(15, -50-i*12); ctx.closePath();
                     ctx.fillStyle = '#3a5a3a'; ctx.fill();
                 }
             } else if (type === 'birch') {
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -75);
                 ctx.strokeStyle = '#d0d8c0'; ctx.lineWidth = 5; ctx.stroke();
                 for (let i = 0; i < 4; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3, -25 - i * 15);
-                    ctx.lineTo(3, -25 - i * 15); ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1; ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(-3, -25-i*15);
+                    ctx.lineTo(3, -25-i*15); ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1; ctx.stroke();
                 }
-                ctx.beginPath(); ctx.arc(0, -80, 18, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(0, -80, 18, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(200,210,180,0.6)'; ctx.fill();
             } else if (type === 'berry') {
                 for (let i = 0; i < 6; i++) {
                     ctx.beginPath();
-                    ctx.arc(-5 + (Math.random() - 0.5) * 16, -60 - Math.random() * 25, 3, 0, Math.PI * 2);
+                    ctx.arc(-5+(Math.random()-0.5)*16, -60-Math.random()*25, 3, 0, Math.PI*2);
                     ctx.fillStyle = '#6a3050'; ctx.fill();
                 }
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -40, -5, -80);
                 ctx.strokeStyle = '#4a6a3a'; ctx.lineWidth = 2; ctx.stroke();
             } else if (type === 'grass') {
                 for (let i = 0; i < 5; i++) {
-                    ctx.beginPath(); ctx.moveTo(-3 + i * 3, 0);
-                    ctx.quadraticCurveTo(-5 + i * 3, -50, -8 + i * 6, -90);
+                    ctx.beginPath(); ctx.moveTo(-3+i*3, 0);
+                    ctx.quadraticCurveTo(-5+i*3, -50, -8+i*6, -90);
                     ctx.strokeStyle = '#c8c898'; ctx.lineWidth = 1.5; ctx.stroke();
                 }
             }
-            
             return c.toDataURL();
         }
-        // === КУЛДАУН ===
+
+        // КУЛДАУН
         function updateCooldownButton() {
-            const btn = document.querySelector('.input-panel button');
+            const btn = document.getElementById('plantButton');
             if (isAdmin) {
                 btn.textContent = '👑 Посадить';
                 btn.disabled = false;
@@ -1669,11 +1282,9 @@
                 cooldownTimer = null;
                 return;
             }
-            
             const now = Date.now();
             const elapsed = Math.floor((now - lastPlantTime) / 1000);
             const remaining = PLANT_COOLDOWN - elapsed;
-            
             if (remaining <= 0) {
                 btn.textContent = 'Посадить 🌱';
                 btn.disabled = false;
@@ -1693,16 +1304,15 @@
                 }
             }
         }
-        
+
         function setupPlantInteractions(plantData) {
+            const wrapper = plantData.el;
             let lastTap = 0;
-            
             wrapper.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (e.target.closest('.delete-btn')) return;
                 handlePlantInteraction(plantData, e);
             });
-            
             wrapper.addEventListener('touchend', (e) => {
                 if (e.target.closest('.delete-btn')) return;
                 const now = Date.now();
@@ -1716,12 +1326,11 @@
                 }
                 lastTap = now;
             });
-            
             wrapper.addEventListener('mouseenter', (e) => showTooltip(e, plantData));
             wrapper.addEventListener('mousemove', (e) => positionTooltip(e));
             wrapper.addEventListener('mouseleave', () => hideTooltip());
         }
-        
+
         function handlePlantInteraction(plantData, e) {
             if (clickTimers.has(plantData)) {
                 clearTimeout(clickTimers.get(plantData));
@@ -1734,8 +1343,8 @@
                 }, 300));
             }
         }
-        
-        // === ПОСАДИТЬ ===
+
+        // ПОСАДИТЬ
         function plantSeed() {
             if (!isAdmin) {
                 const now = Date.now();
@@ -1748,98 +1357,76 @@
                     return;
                 }
             }
-            
             const input = document.getElementById('textInput');
             const text = input.value.trim();
-            
             if (!isValidMessage(text)) {
                 input.style.border = '1px solid #ff4444';
                 showNotification('🌱 Напиши что-то осмысленное...');
                 setTimeout(() => input.style.border = '', 1000);
                 return;
             }
-            
             const plant = getPlantByText(text);
             const imgSrc = drawPlant(plant.type, plant.color);
-            
             let px, py;
             if (allPlants.length > 0) {
                 const near = allPlants[Math.floor(Math.random() * allPlants.length)];
                 const pos = findValidPosition(near);
-                px = pos.x;
-                py = pos.y;
+                px = pos.x; py = pos.y;
             } else {
-                px = MAP_WIDTH / 2;
-                py = MAP_HEIGHT * 0.3;
+                px = MAP_WIDTH / 2; py = MAP_HEIGHT * 0.3;
             }
-            
             const wrapper = document.createElement('div');
             wrapper.className = 'plant-wrapper';
             wrapper.style.left = px + 'px';
             wrapper.style.top = py + 'px';
             wrapper.style.width = '70px';
             wrapper.style.height = '120px';
-            
             const img = document.createElement('img');
             img.src = imgSrc;
             img.className = 'plant-img';
             img.style.width = '70px';
             img.style.height = '100px';
             wrapper.appendChild(img);
-            
             const plantData = {
                 x: px, y: py, el: wrapper, text: text,
                 name: plant.name, emoji: plant.emoji, type: plant.type,
                 watered: 0, fireflies: 0, giftedFireflies: [], plantedAt: Date.now(),
                 firebaseId: null
             };
-            
             setupPlantInteractions(plantData);
-            
             meadowLayer.appendChild(wrapper);
             allPlants.push(plantData);
             plantCount++;
             document.getElementById('counter').textContent = 'Растений в саду: ' + plantCount;
-            
-            // Сохраняем в Firebase
             savePlantToFirebase(plantData);
-            
-            if (isAdmin) {
-                addDeleteButton(plantData);
-            }
-            
+            if (isAdmin) addDeleteButton(plantData);
             centerOnPlant(px, py);
-            
-            if (!isAdmin) {
-                lastPlantTime = Date.now();
-            }
+            if (!isAdmin) lastPlantTime = Date.now();
             updateCooldownButton();
-            
             input.value = '';
             input.placeholder = isAdmin ? '👑 Админ-посадка...' : 'Растение посажено...';
             setTimeout(() => input.placeholder = 'Напиши то, что не отправил...', 2000);
         }
-        
+
+        document.getElementById('plantButton').addEventListener('click', plantSeed);
         document.getElementById('textInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') plantSeed();
         });
-        
         document.getElementById('btnTop3').addEventListener('click', showTop3);
         document.getElementById('btnFindGarden').addEventListener('click', findGarden);
-        
-        // === ЗАПУСК ===
+
+        // ЗАПУСК
         function init() {
             setupOnlineStatus();
             setupPlantsSync();
             updateAdminButtonText();
-            
+            updateCooldownButton();
             setTimeout(() => {
                 const legend = document.getElementById('legend');
                 legend.classList.add('visible');
                 setTimeout(() => legend.classList.remove('visible'), 6000);
             }, 1000);
         }
-        
         init();
     </script>
 </body>
